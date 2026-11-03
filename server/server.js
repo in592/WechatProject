@@ -7,7 +7,8 @@
  * 约定（AGENTS.md 第 5 节）：
  *   1. OPTIONS 预检最优先，返回 204
  *   2. 请求体不是合法 JSON 时返回 400，进程不能崩
- *   3. 写接口：POST /api/import（唯一导入入口）、PUT/DELETE /api/activities/:id（后台管理）
+ *   3. 写接口：POST /api/import（网页/模拟）、POST /api/qq/event（OneBot 11）、
+ *      PUT/DELETE /api/activities/:id（后台管理）
  */
 
 const http = require('http')
@@ -40,7 +41,7 @@ const MIME_TYPES = {
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-QQ-Token',
   'Access-Control-Max-Age': '86400'
 }
 
@@ -69,6 +70,97 @@ function guessType(text) {
   if (/摄影|编程|设计|写作|演讲|辩论|工作坊|培训|技能/.test(text)) return '技能特长'
   if (/篮球|足球|羽毛|乒乓|排球|网球|运动会|歌唱|歌手|舞蹈|演出|晚会|文艺|比赛|电影/.test(text)) return '文体活动'
   return '其他'
+}
+
+const QQ_BOT_TOKEN = process.env.QQ_BOT_TOKEN || ''
+const QQ_GROUP_ID = process.env.QQ_GROUP_ID || ''
+const qqSeen = new Map()
+
+function importText(text, source, callback) {
+  const parsed = parser.parse(text)
+
+  if (!parsed.ok) {
+    callback({
+      status: 422,
+      body: {
+        ok: false,
+        error: '解析失败，请检查通知内容',
+        warnings: parsed.warnings,
+        activity: parsed.activity
+      }
+    })
+    return
+  }
+
+  const data = readData()
+  if (!Array.isArray(data.activities)) data.activities = []
+
+  const activity = {
+    id: crypto.randomUUID(),
+    title: parsed.activity.title,
+    start: parsed.activity.start,
+    end: parsed.activity.end,
+    location: parsed.activity.location,
+    credit: parsed.activity.credit,
+    organizer: parsed.activity.organizer,
+    type: guessType(text),
+    source: source,
+    rawText: text,
+    createdAt: new Date().toISOString()
+  }
+
+  data.activities.unshift(activity)
+  writeData(data)
+
+  callback({
+    status: 201,
+    body: {
+      ok: true,
+      activity: activity,
+      warnings: parsed.warnings
+    }
+  })
+}
+
+/** OneBot 11 消息 → 纯文本；去掉 @、图片等 CQ 码 */
+function oneBotText(payload) {
+  if (typeof payload.raw_message === 'string' && payload.raw_message.trim()) {
+    return payload.raw_message.replace(/\[CQ:[^\]]+\]/g, ' ').replace(/\s+/g, ' ').trim()
+  }
+  if (typeof payload.message === 'string') {
+    return payload.message.replace(/\[CQ:[^\]]+\]/g, ' ').replace(/\s+/g, ' ').trim()
+  }
+  if (Array.isArray(payload.message)) {
+    return payload.message.map(function (segment) {
+      if (!segment || segment.type !== 'text' || !segment.data) return ''
+      return String(segment.data.text || '')
+    }).join(' ').replace(/\s+/g, ' ').trim()
+  }
+  if (typeof payload.text === 'string') return payload.text.trim()
+  return ''
+}
+
+function qqAuthorized(req) {
+  if (!QQ_BOT_TOKEN) return true
+  const authorization = String(req.headers.authorization || '')
+  const headerToken = String(req.headers['x-qq-token'] || '')
+  return authorization === 'Bearer ' + QQ_BOT_TOKEN || headerToken === QQ_BOT_TOKEN
+}
+
+function qqKey(payload, text) {
+  if (payload.message_id !== undefined && payload.message_id !== null) {
+    return 'id:' + String(payload.message_id)
+  }
+  const raw = [payload.group_id, payload.user_id, payload.time, text].join('|')
+  return 'hash:' + crypto.createHash('sha1').update(raw).digest('hex')
+}
+
+function markQQSeen(key) {
+  qqSeen.set(key, Date.now())
+  if (qqSeen.size > 500) {
+    const first = qqSeen.keys().next().value
+    qqSeen.delete(first)
+  }
 }
 
 function sendJson(res, statusCode, payload) {
@@ -369,7 +461,70 @@ const server = http.createServer(function (req, res) {
     return
   }
 
-  // 唯一写入口：解析入库下一步接上
+  // OneBot 11 适配器：NapCat / LLOneBot 把群消息 POST 到这里
+  if (req.method === 'POST' && (pathname === '/api/qq/event' || pathname === '/api/qq/message')) {
+    if (!qqAuthorized(req)) {
+      sendJson(res, 401, { ok: false, error: 'QQ bot token 不正确' })
+      return
+    }
+
+    readJsonBody(req, function (err, body) {
+      if (err) {
+        const tooLarge = err.message === 'TOO_LARGE'
+        sendJson(res, tooLarge ? 413 : 400, {
+          ok: false,
+          error: tooLarge ? '请求体过大' : '请求体不是合法 JSON'
+        })
+        return
+      }
+
+      const payload = body && typeof body === 'object' ? body : {}
+
+      if (payload.post_type && payload.post_type !== 'message') {
+        sendNoContent(res)
+        return
+      }
+      if (payload.message_type && payload.message_type !== 'group') {
+        sendNoContent(res)
+        return
+      }
+      if (QQ_GROUP_ID && String(payload.group_id || '') !== QQ_GROUP_ID) {
+        sendNoContent(res)
+        return
+      }
+
+      const text = oneBotText(payload)
+      if (!text) {
+        sendJson(res, 200, { ok: false, error: '空消息' })
+        return
+      }
+
+      const key = qqKey(payload, text)
+      if (qqSeen.has(key)) {
+        sendJson(res, 200, { ok: true, skipped: true })
+        return
+      }
+
+      importText(text, 'qq', function (result) {
+        if (result.status === 201) markQQSeen(key)
+
+        if (result.status === 422) {
+          sendJson(res, 200, {
+            ok: false,
+            error: '解析失败',
+            warnings: result.body.warnings,
+            activity: result.body.activity
+          })
+          return
+        }
+
+        sendJson(res, 200, result.body)
+      })
+    })
+    return
+  }
+
+  // 网页后台 / 模拟上报的导入入口
   if (req.method === 'POST' && pathname === '/api/import') {
     readJsonBody(req, function (err, body) {
       if (err) {
@@ -390,42 +545,8 @@ const server = http.createServer(function (req, res) {
       }
 
       const source = payload.source === 'qq' ? 'qq' : 'web'
-      const parsed = parser.parse(text)
-
-      if (!parsed.ok) {
-        sendJson(res, 422, {
-          ok: false,
-          error: '解析失败，请检查通知内容',
-          warnings: parsed.warnings,
-          activity: parsed.activity
-        })
-        return
-      }
-
-      const data = readData()
-      if (!Array.isArray(data.activities)) data.activities = []
-
-      const activity = {
-        id: crypto.randomUUID(),
-        title: parsed.activity.title,
-        start: parsed.activity.start,
-        end: parsed.activity.end,
-        location: parsed.activity.location,
-        credit: parsed.activity.credit,
-        organizer: parsed.activity.organizer,
-        type: guessType(text),
-        source: source,
-        rawText: text,
-        createdAt: new Date().toISOString()
-      }
-
-      data.activities.unshift(activity)
-      writeData(data)
-
-      sendJson(res, 201, {
-        ok: true,
-        activity: activity,
-        warnings: parsed.warnings
+      importText(text, source, function (result) {
+        sendJson(res, result.status, result.body)
       })
     })
     return

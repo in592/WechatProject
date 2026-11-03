@@ -24,6 +24,7 @@
 | 7 | 学号 + 姓名登录（本地态） | 小程序 |
 | 8 | **我的**：已报名活动 + 按类型的学分饼图（本地态） | 小程序 |
 | 9 | **拍照识别课表**：Windows 本机 OCR，识别多门课程后批量确认导入 | 小程序 + 本机后端 |
+| 10 | **QQ 群消息 → 活动导入**：OneBot 11（NapCat / LLOneBot）HTTP 上报 | 后端 |
 
 > 学分饼图只统计「已报名」的活动，数据保存在本机，不做云端汇总。
 > 拍照 OCR 只用 Windows 自带中文 OCR，不上传第三方；识别结果仅用于预填，最终由用户确认后写入日程。
@@ -39,18 +40,19 @@
 
 > 冲突计算只发生在“点报名”这一处。列表页**不**计算状态，不要自作主张加回徽章。
 
-### 预留：QQ 导入（只留接口形状，不实现）
+### QQ 导入（OneBot 11 适配器）
 
-QQ 机器人**本期不实现**，但入口要留好，将来接入只需加一个调用方，不改现有代码：
+QQ 登录/收发由 **NapCat / LLOneBot** 负责；本项目只接收 OneBot 11 的 HTTP 上报，**不实现 QQ 登录、发消息、群管理**。
 
-- 唯一的写入口是 **`POST /api/import`**，请求体 `{ text, source }`
-  - `text`：通知原文
-  - `source`：`'web'`（后台粘贴）或 `'qq'`（将来机器人转发），默认 `'web'`
-- 服务端解析后入库，返回 `{ ok, activity, warnings }`
-- 活动数据保留 `source` 字段，管理后台列表显示来源
-- **现在不要写任何 QQ 相关代码**：不装插件、不引 SDK、不写 WebSocket 客户端
+- 上报入口：**`POST /api/qq/event`**（兼容 `/api/qq/message`）
+- 只处理群消息：`post_type=message`、`message_type=group`；可选 `QQ_GROUP_ID` 白名单
+- 可选令牌：`QQ_BOT_TOKEN`，支持 `Authorization: Bearer <token>` 或 `X-QQ-Token`
+- 提取纯文本后走现有 `parser.parse()`，入库 `source='qq'`，管理后台来源显示 QQ
+- 去重：优先 `message_id`；缺失时用 `group_id + user_id + time + text` 哈希
+- 保留 **`POST /api/import`**，请求体 `{ text, source }`，供网页后台和模拟上报使用
+- 不要把 QQ 账号、密码、Token 提交到仓库；只做接收消息，不做自动发广告/自动回复
 
-> 将来接入时，机器人只需把群消息文本 POST 到这个接口，其余全不动。
+> 详细配置见 `docs/QQ.md`。
 
 ## 2 演示主线（3 分钟必须走通）
 
@@ -74,6 +76,7 @@ QQ 机器人**本期不实现**，但入口要留好，将来接入只需加一�
 ea-hackathon/
   AGENTS.md              本文件
   docs/PLAYBOOK.md       完整工程手册
+  docs/QQ.md             OneBot 11 接入说明
   server/
     server.js            零依赖 HTTP 服务
     data.json            运行时数据（不入库）
