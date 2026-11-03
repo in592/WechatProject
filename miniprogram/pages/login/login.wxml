@@ -1,5 +1,24 @@
 <view class="page">
-  <view class="title">校园管家</view>
-  <view class="subtitle">登录页（建设中）</view>
-  <view class="hint">学号 + 姓名登录，后续实现</view>
+  <view class="hero">
+    <view class="logo">校</view>
+    <view class="title">校园管家</view>
+    <view class="subtitle">把社团通知变成能报名的活动</view>
+  </view>
+
+  <view class="card">
+    <view class="field">
+      <view class="label">学号</view>
+      <input class="input" type="number" maxlength="20" placeholder="至少 4 位数字" value="{{studentId}}" bindinput="onStudentIdInput" />
+    </view>
+
+    <view class="field">
+      <view class="label">姓名</view>
+      <input class="input" type="text" maxlength="20" placeholder="请输入姓名" value="{{name}}" bindinput="onNameInput" />
+    </view>
+
+    <view class="error" wx:if="{{error}}">{{error}}</view>
+
+    <button class="submit" type="primary" bindtap="onLogin">进入校园管家</button>
+    <view class="tip">登录信息只保存在本机，不会上传服务器</view>
+  </view>
 </view>
