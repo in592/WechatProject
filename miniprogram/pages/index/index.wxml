@@ -49,7 +49,7 @@
 
   <view class="list" wx:else>
     <view
-      class="card"
+      class="card card-{{item.typeClass}}"
       wx:for="{{filtered}}"
       wx:key="id"
       data-id="{{item.id}}"

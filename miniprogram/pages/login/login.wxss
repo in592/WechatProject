@@ -1,12 +1,15 @@
 .page {
   box-sizing: border-box;
   min-height: 100vh;
-  padding: 96rpx 48rpx 64rpx;
-  background: linear-gradient(180deg, #e9fbf1 0%, #f5f6f8 42%);
+  padding: 48rpx 40rpx 64rpx;
+  background: #FFF8F6;
 }
 
 .hero {
-  margin-bottom: 56rpx;
+  margin-bottom: 28rpx;
+  padding: 48rpx 24rpx 40rpx;
+  border-radius: 32rpx;
+  background: #FFE4F1;
   text-align: center;
 }
 
@@ -15,9 +18,9 @@
   height: 112rpx;
   margin: 0 auto 24rpx;
   border-radius: 32rpx;
-  background: linear-gradient(135deg, #07c160, #06ad56);
-  box-shadow: 0 12rpx 32rpx rgba(7, 193, 96, 0.25);
-  color: #ffffff;
+  background: linear-gradient(135deg, #FF7EC1, #65020A);
+  box-shadow: 0 12rpx 32rpx rgba(101, 2, 10, 0.18);
+  color: #FFFFFF;
   font-size: 56rpx;
   font-weight: 600;
   line-height: 112rpx;
@@ -25,6 +28,7 @@
 }
 
 .title {
+  color: #65020A;
   font-size: 52rpx;
   font-weight: 600;
   letter-spacing: 2rpx;
@@ -32,15 +36,15 @@
 
 .subtitle {
   margin-top: 12rpx;
+  color: #5A6069;
   font-size: 26rpx;
-  color: #7a828c;
 }
 
 .card {
   padding: 40rpx 36rpx 32rpx;
   border-radius: 28rpx;
-  background: #ffffff;
-  box-shadow: 0 16rpx 48rpx rgba(31, 35, 41, 0.06);
+  background: #FFFFFF;
+  box-shadow: 0 16rpx 48rpx rgba(101, 2, 10, 0.06);
 }
 
 .field {
@@ -49,7 +53,7 @@
 
 .label {
   margin-bottom: 12rpx;
-  color: #5a6069;
+  color: #5A6069;
   font-size: 26rpx;
 }
 
@@ -58,13 +62,14 @@
   height: 88rpx;
   padding: 0 24rpx;
   border-radius: 16rpx;
-  background: #f5f6f8;
+  background: #FFF8F6;
+  color: #1F2329;
   font-size: 30rpx;
 }
 
 .error {
   margin: 4rpx 0 20rpx;
-  color: #e5484d;
+  color: #D9365F;
   font-size: 24rpx;
 }
 
@@ -72,8 +77,8 @@
   width: 100%;
   height: 88rpx;
   border-radius: 44rpx;
-  background: #07c160;
-  color: #ffffff;
+  background: #65020A;
+  color: #FFFFFF;
   font-size: 30rpx;
   font-weight: 500;
   line-height: 88rpx;
@@ -85,7 +90,7 @@
 
 .tip {
   margin-top: 24rpx;
-  color: #9aa1aa;
+  color: #8A9099;
   font-size: 22rpx;
   text-align: center;
 }
