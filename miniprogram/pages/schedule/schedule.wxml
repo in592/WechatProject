@@ -7,7 +7,7 @@
   <view class="form-card">
     <view class="form-head">
       <text class="form-title">添加日程</text>
-      <button class="ocr-btn" bindtap="onOcrTap" loading="{{ocrLoading}}">拍照识别</button>
+      <button class="ocr-btn" bindtap="onOcrTap" loading="{{ocrLoading}}">拍照 / 选图</button>
     </view>
 
     <view class="field">

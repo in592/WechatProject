@@ -117,6 +117,19 @@ Page({
 
     const that = this
 
+    wx.showActionSheet({
+      itemList: ['拍照', '从相册选择图片', '从微信聊天选择文件'],
+      success: function (res) {
+        if (res.tapIndex === 0) that.chooseOcrImage('camera')
+        if (res.tapIndex === 1) that.chooseOcrImage('album')
+        if (res.tapIndex === 2) that.chooseOcrFile()
+      }
+    })
+  },
+
+  chooseOcrImage: function (source) {
+    const that = this
+
     function handle(path) {
       if (path) that.readImage(path)
     }
@@ -125,7 +138,7 @@ Page({
       wx.chooseMedia({
         count: 1,
         mediaType: ['image'],
-        sourceType: ['camera', 'album'],
+        sourceType: [source],
         sizeType: ['compressed'],
         success: function (res) {
           const file = res.tempFiles && res.tempFiles[0]
@@ -138,9 +151,28 @@ Page({
     wx.chooseImage({
       count: 1,
       sizeType: ['compressed'],
-      sourceType: ['camera', 'album'],
+      sourceType: [source],
       success: function (res) {
         handle(res.tempFilePaths && res.tempFilePaths[0])
+      }
+    })
+  },
+
+  chooseOcrFile: function () {
+    const that = this
+
+    if (!wx.chooseMessageFile) {
+      wx.showToast({ title: '当前环境不支持选择文件', icon: 'none' })
+      return
+    }
+
+    wx.chooseMessageFile({
+      count: 1,
+      type: 'all',
+      success: function (res) {
+        const file = res.tempFiles && res.tempFiles[0]
+        const path = file && (file.path || file.tempFilePath)
+        if (path) that.readImage(path)
       }
     })
   },
