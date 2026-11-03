@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>校园管家 · UI 配色预案</title>
+<style>
+  :root {
+    --brand-700: #267A54;
+    --brand-500: #5ECD8C;
+    --brand-100: #E6F8EE;
+    --sun-500: #FFC44F;
+    --sun-100: #FFF3D6;
+    --alert-500: #D9365F;
+    --alert-100: #FFE3EC;
+    --info-500: #4F5BD5;
+    --info-100: #EEF0FF;
+    --paper: #FFF9F0;
+    --ink: #1F2329;
+    --ink-600: #5A6069;
+    --ink-400: #8A9099;
+    --line: #ECE7DE;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 48px 32px 80px;
+    background: #F3EFE7;
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  header h1 {
+    margin: 0;
+    font-size: 34px;
+    letter-spacing: 1px;
+  }
+
+  header p {
+    margin: 10px 0 0;
+    color: var(--ink-600);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  h2 {
+    margin: 48px 0 18px;
+    font-size: 20px;
+  }
+
+  .sub {
+    margin: -8px 0 18px;
+    color: var(--ink-400);
+    font-size: 13px;
+  }
+
+  .palettes {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  .palette {
+    overflow: hidden;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(31, 35, 41, .06);
+  }
+
+  .palette .block {
+    height: 96px;
+    display: flex;
+    align-items: flex-end;
+    padding: 12px;
+    font-size: 12px;
+    letter-spacing: .5px;
+  }
+
+  .palette .meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--ink-600);
+  }
+
+  .badge {
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--sun-100);
+    color: #8A5A00;
+    font-size: 11px;
+  }
+
+  .tokens {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+  }
+
+  .token {
+    padding: 14px;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(31, 35, 41, .05);
+  }
+
+  .token .dot {
+    height: 44px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+
+  .token .name { font-size: 12px; font-weight: 600; }
+  .token .hex { margin-top: 3px; color: var(--ink-400); font-size: 11px; }
+
+  .screens {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    align-items: flex-start;
+  }
+
+  .phone {
+    width: 300px;
+    height: 620px;
+    border-radius: 38px;
+    background: #fff;
+    box-shadow: 0 18px 46px rgba(31, 35, 41, .14);
+    overflow: hidden;
+    position: relative;
+    flex: none;
+  }
+
+  .screen {
+    height: 100%;
+    background: var(--paper);
+    overflow: hidden;
+    font-size: 12px;
+  }
+
+  .login .hero {
+    padding: 52px 26px 30px;
+    background: var(--brand-100);
+    text-align: center;
+  }
+
+  .logo {
+    width: 62px;
+    height: 62px;
+    margin: 0 auto 14px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--brand-500), var(--brand-700));
+    color: #fff;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 62px;
+  }
+
+  .login h3 {
+    margin: 0;
+    font-size: 24px;
+    letter-spacing: 1px;
+  }
+
+  .login .slogan {
+    margin-top: 8px;
+    color: var(--ink-600);
+    font-size: 11px;
+  }
+
+  .login .form {
+    margin: 20px 18px;
+    padding: 18px;
+    border-radius: 18px;
+    background: #fff;
+  }
+
+  .label { margin: 12px 0 6px; color: var(--ink-600); font-size: 11px; }
+  .label:first-child { margin-top: 0; }
+
+  .input {
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 12px;
+    background: #F5F3EE;
+    color: var(--ink);
+    line-height: 40px;
+  }
+
+  .btn {
+    width: 100%;
+    height: 42px;
+    margin-top: 18px;
+    border: 0;
+    border-radius: 21px;
+    background: var(--brand-700);
+    color: #fff;
+    font-size: 13px;
+    font-family: inherit;
+  }
+
+  .tip { margin-top: 12px; text-align: center; color: var(--ink-400); font-size: 10px; }
+
+  .index { padding: 26px 16px; }
+
+  .hello { font-size: 22px; font-weight: 600; }
+  .hello-sub { margin-top: 4px; color: var(--ink-400); font-size: 11px; }
+
+  .search {
+    height: 38px;
+    margin-top: 14px;
+    padding: 0 14px;
+    border-radius: 19px;
+    background: #fff;
+    color: var(--ink-400);
+    font-size: 11px;
+    line-height: 38px;
+    box-shadow: 0 4px 14px rgba(31, 35, 41, .05);
+  }
+
+  .tabs { display: flex; gap: 6px; margin-top: 14px; overflow: hidden; }
+
+  .tab {
+    padding: 7px 11px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--ink-600);
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .tab.active { border-color: var(--brand-700); background: var(--brand-700); color: #fff; }
+
+  .act-card {
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(31, 35, 41, .05);
+    border-left: 5px solid var(--info-500);
+  }
+
+  .act-title { font-size: 13px; font-weight: 600; }
+  .act-meta { margin-top: 6px; color: var(--ink-600); font-size: 10px; }
+
+  .tag {
+    display: inline-block;
+    margin-top: 9px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--info-100);
+    color: var(--info-500);
+    font-size: 9px;
+  }
+
+  .detail .hero {
+    padding: 36px 22px 24px;
+    background: var(--brand-100);
+  }
+
+  .detail .tag { margin: 0; }
+  .detail h3 { margin: 12px 0 0; font-size: 22px; line-height: 1.35; }
+  .detail .when { margin-top: 8px; color: var(--brand-700); font-size: 11px; font-weight: 600; }
+
+  .detail .body { padding: 18px 20px; }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 11px;
+  }
+
+  .row span { color: var(--ink-400); }
+  .row b { font-weight: 600; }
+
+  .detail .btn { margin-top: 22px; }
+
+  .modal-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    background: rgba(31, 35, 41, .32);
+  }
+
+  .modal {
+    width: 100%;
+    padding: 18px 18px 22px;
+    border-radius: 22px 22px 0 0;
+    background: #fff;
+  }
+
+  .modal-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--alert-500);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .modal-head::before {
+    content: "!";
+    display: grid;
+    width: 20px;
+    height: 20px;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--alert-100);
+    font-size: 12px;
+  }
+
+  .modal-body { margin-top: 10px; color: var(--ink-600); font-size: 11px; line-height: 1.7; }
+  .modal-body b { color: var(--ink); }
+
+  .slot {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--sun-100);
+    color: #8A5A00;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+  .modal-actions button { flex: 1; height: 38px; border: 0; border-radius: 19px; background: var(--brand-700); color: #fff; font-family: inherit; font-size: 12px; }
+  .modal-actions .ghost { background: #F5F3EE; color: var(--ink-600); }
+
+  .directions { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .direction { padding: 18px; border-radius: 16px; background: #fff; }
+  .direction h3 { margin: 0 0 8px; font-size: 15px; }
+  .direction p { margin: 0; color: var(--ink-600); font-size: 12px; line-height: 1.7; }
+  .swatches { display: flex; gap: 6px; margin-top: 12px; }
+  .swatches i { width: 34px; height: 34px; border-radius: 9px; }
+
+  footer { margin-top: 48px; color: var(--ink-400); font-size: 12px; line-height: 1.8; }
+
+  @media (max-width: 900px) {
+    .palettes { grid-template-columns: repeat(2, 1fr); }
+    .tokens { grid-template-columns: repeat(3, 1fr); }
+    .directions { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>校园管家 · UI 配色预案</h1>
+    <p>参考 8 组撞色，提炼成「品牌色 + 语义色」。撞色只做重点，不做整屏底色。<br>
+       推荐方向 A：艾草青 + 浅松色；冲突用桃绯粉，信息用长春花蓝。</p>
+  </header>
+
+  <h2>8 组参考撞色</h2>
+  <div class="palettes">
+    <div class="palette">
+      <div class="block" style="background:#65020A"><span style="color:#18D5E7">#65020A</span></div>
+      <div class="meta"><span>浆果红 × 湖蓝</span><span>#18D5E7</span></div>
+    </div>
+    <div class="palette">
+      <div class="block" style="background:#615EDE"><span style="color:#FF7EC1">#615EDE</span></div>
+      <div class="meta"><span>雾堇紫 × 樱粉</span><span>#FF7EC1</span></div>
+    </div>
+    <div class="palette">
+      <div class="block" style="background:#7B8AD7"><span style="color:#6D483B">#7B8AD7</span></div>
+      <div class="meta"><span>长春花蓝 × 可可棕</span><span>#6D483B</span></div>
+    </div>
+    <div class="palette">
+      <div class="block" style="background:#F35B83"><span style="color:#8AEED1">#F35B83</span></div>
+      <div class="meta"><span>桃绯粉 × 薄荷青</span><span>#8AEED1</span></div>
+    </div>
+    <div class="palette">
+      <div class="block" style="background:#FF7CA2"><span style="color:#000">#FF7CA2</span></div>
+      <div class="meta"><span>胭脂粉 × 墨黑</span><span>#000000</span></div>
+    </div>
+    <div class="palette">
+      <div class="block" style="background:#FFCBC6"><span style="color:#465C47">#FFCBC6</span></div>
+      <div class="meta"><span>裸桃粉 × 苔青</span><span>#465C47</span></div>
+    </div>
+    <div class="palette">
+      <div class="block" style="background:#FFC44F"><span style="color:#267A54">#FFC44F</span></div>
+      <div class="meta"><span>浅松色 × 艾草青</span><span class="badge">推荐</span></div>
+    </div>
+    <div class="palette">
+      <div class="block" style="background:#B85516"><span style="color:#EAAE35">#B85516</span></div>
+      <div class="meta"><span>柿橙 × 密金</span><span>#EAAE35</span></div>
+    </div>
+  </div>
+
+  <h2>方向 A 色板</h2>
+  <p class="sub">60% 暖白 / 白卡片，30% 绿系，10% 黄、粉、蓝点缀。</p>
+  <div class="tokens">
+    <div class="token"><div class="dot" style="background:#267A54"></div><div class="name">brand-700</div><div class="hex">#267A54</div></div>
+    <div class="token"><div class="dot" style="background:#5ECD8C"></div><div class="name">brand-500</div><div class="hex">#5ECD8C</div></div>
+    <div class="token"><div class="dot" style="background:#FFC44F"></div><div class="name">sun-500</div><div class="hex">#FFC44F</div></div>
+    <div class="token"><div class="dot" style="background:#D9365F"></div><div class="name">alert-500</div><div class="hex">#D9365F</div></div>
+    <div class="token"><div class="dot" style="background:#4F5BD5"></div><div class="name">info-500</div><div class="hex">#4F5BD5</div></div>
+    <div class="token"><div class="dot" style="background:#FFF9F0;border:1px solid #ECE7DE"></div><div class="name">paper</div><div class="hex">#FFF9F0</div></div>
+  </div>
+
+  <h2>关键页面示意</h2>
+  <div class="screens">
+    <div class="phone">
+      <div class="screen login">
+        <div class="hero">
+          <div class="logo">校</div>
+          <h3>校园管家</h3>
+          <div class="slogan">把社团通知变成能报名的活动</div>
+        </div>
+        <div class="form">
+          <div class="label">学号</div>
+          <div class="input">20230001</div>
+          <div class="label">姓名</div>
+          <div class="input">张三</div>
+          <button class="btn">进入校园管家</button>
+          <div class="tip">登录信息只保存在本机</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="screen index">
+        <div class="hello">你好，张三</div>
+        <div class="hello-sub">今天想去哪场活动？</div>
+        <div class="search">搜索活动标题 / 地点</div>
+        <div class="tabs">
+          <span class="tab active">全部</span>
+          <span class="tab">学术科技</span>
+          <span class="tab">志愿公益</span>
+          <span class="tab">文体活动</span>
+        </div>
+        <div class="act-card">
+          <div class="act-title">人工智能前沿讲座</div>
+          <div class="act-meta">11-06 15:00 - 17:00</div>
+          <div class="act-meta">图书馆三楼报告厅</div>
+          <span class="tag">学术科技</span>
+        </div>
+        <div class="act-card" style="border-left-color:#615EDE">
+          <div class="act-title">摄影分享会</div>
+          <div class="act-meta">11-11 19:30 - 21:30</div>
+          <div class="act-meta">报告厅</div>
+          <span class="tag" style="background:#F0EDFF;color:#615EDE">技能特长</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="screen detail">
+        <div class="hero">
+          <span class="tag">学术科技</span>
+          <h3>人工智能前沿讲座</h3>
+          <div class="when">2026-11-06 15:00 - 17:00</div>
+        </div>
+        <div class="body">
+          <div class="row"><span>地点</span><b>图书馆三楼报告厅</b></div>
+          <div class="row"><span>学分</span><b>0.5 学分</b></div>
+          <div class="row"><span>主办</span><b>计算机学院</b></div>
+          <button class="btn">报名</button>
+        </div>
+        <div class="modal-wrap">
+          <div class="modal">
+            <div class="modal-head">时间冲突</div>
+            <div class="modal-body">与 <b>「高数补习」</b> 冲突<br>周五 15:00 - 17:00</div>
+            <div class="slot">推荐：周四 19:00 你有空</div>
+            <div class="modal-actions">
+              <button class="ghost">取消</button>
+              <button>去看空闲时段</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>备选方向</h2>
+  <div class="directions">
+    <div class="direction">
+      <h3>B · 社团海报</h3>
+      <p>桃绯粉 + 薄荷青，冲击力强，适合短视频封面；但大面积粉色容易像美妆/电商，正文易疲劳。</p>
+      <div class="swatches"><i style="background:#C92A56"></i><i style="background:#8AEED1"></i><i style="background:#1F2329"></i></div>
+    </div>
+    <div class="direction">
+      <h3>C · 学术夜校</h3>
+      <p>长春花蓝 + 可可棕，安静复古，适合讲座；但社团招新类活动会显得不够热闹。</p>
+      <div class="swatches"><i style="background:#4F5BD5"></i><i style="background:#6D483B"></i><i style="background:#F7F1EA"></i></div>
+    </div>
+  </div>
+
+  <footer>
+    说明：以上为配色预案，未改动任何页面代码。<br>
+    建议在 P8 打磨阶段统一落地；先选方向，再改 `app.wxss` 和页面样式。
+  </footer>
+</div>
+</body>
+</html>
