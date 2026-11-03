@@ -1,0 +1,395 @@
+/**
+ * tools/selftest.js —— utils/conflict.js 自测
+ *
+ * 零依赖，直接跑：
+ *   node tools/selftest.js
+ *
+ * 全部通过时退出码 0；有失败时退出码 1（方便以后接 CI / pre-commit）。
+ */
+
+const assert = require('assert')
+const path = require('path')
+
+const conflict = require(path.join(__dirname, '..', 'miniprogram', 'utils', 'conflict.js'))
+
+const ts = conflict.toTimestamp
+
+let total = 0
+const failures = []
+
+function test(name, fn) {
+  total++
+  try {
+    fn()
+    console.log('  PASS  ' + name)
+  } catch (err) {
+    failures.push({ name: name, err: err })
+    console.log('  FAIL  ' + name)
+    console.log('        ' + String(err && err.message ? err.message : err).replace(/\n/g, '\n        '))
+  }
+}
+
+function group(name) {
+  console.log('\n' + name)
+}
+
+// ---------------------------------------------------------------------------
+// 1. 时间解析
+// ---------------------------------------------------------------------------
+group('1. 时间解析 toTimestamp / formatTimestamp')
+
+test('空格格式与 T 格式解析为同一时刻', function () {
+  assert.strictEqual(ts('2026-11-06 15:00'), ts('2026-11-06T15:00'))
+  assert.strictEqual(ts('2026-11-06 15:00'), new Date(2026, 10, 6, 15, 0, 0, 0).getTime())
+})
+
+test('首尾空格不影响解析', function () {
+  assert.strictEqual(ts(' 2026-11-06 15:00 '), ts('2026-11-06 15:00'))
+})
+
+test('接受 Date 与毫秒时间戳', function () {
+  const date = new Date(2026, 10, 6, 15, 0, 0, 0)
+  assert.strictEqual(ts(date), date.getTime())
+  assert.strictEqual(ts(date.getTime()), date.getTime())
+})
+
+test('空值 / 非法字符串返回 NaN（不是 0）', function () {
+  assert.ok(Number.isNaN(ts('')))
+  assert.ok(Number.isNaN(ts('   ')))
+  assert.ok(Number.isNaN(ts(null)))
+  assert.ok(Number.isNaN(ts(undefined)))
+  assert.ok(Number.isNaN(ts('不是时间')))
+  assert.ok(Number.isNaN(ts('2026-13-01 00:00')))
+})
+
+test('formatTimestamp 补零且格式统一', function () {
+  assert.strictEqual(conflict.formatTimestamp(ts('2026-01-02 03:04')), '2026-01-02 03:04')
+  assert.strictEqual(conflict.formatTimestamp(ts('2026-11-06 15:00')), '2026-11-06 15:00')
+})
+
+test('formatTimestamp 对非法输入返回空串', function () {
+  assert.strictEqual(conflict.formatTimestamp(NaN), '')
+  assert.strictEqual(conflict.formatTimestamp(undefined), '')
+})
+
+// ---------------------------------------------------------------------------
+// 2. 半开区间重叠
+// ---------------------------------------------------------------------------
+group('2. 重叠判定 isOverlapping（半开区间）')
+
+const A_START = '2026-11-06 15:00'
+const A_END = '2026-11-06 17:00'
+
+test('完全相同的区间重叠', function () {
+  assert.strictEqual(conflict.isOverlapping(A_START, A_END, A_START, A_END), true)
+})
+
+test('部分重叠（两侧都算）', function () {
+  assert.strictEqual(conflict.isOverlapping('2026-11-06 16:00', '2026-11-06 18:00', A_START, A_END), true)
+  assert.strictEqual(conflict.isOverlapping(A_START, A_END, '2026-11-06 14:00', '2026-11-06 15:30'), true)
+})
+
+test('一个区间包含另一个', function () {
+  assert.strictEqual(conflict.isOverlapping('2026-11-06 14:00', '2026-11-06 18:00', A_START, A_END), true)
+  assert.strictEqual(conflict.isOverlapping(A_START, A_END, '2026-11-06 15:30', '2026-11-06 16:30'), true)
+})
+
+test('首尾相接不算冲突', function () {
+  assert.strictEqual(conflict.isOverlapping(A_START, A_END, '2026-11-06 17:00', '2026-11-06 18:00'), false)
+  assert.strictEqual(conflict.isOverlapping(A_START, A_END, '2026-11-06 13:00', '2026-11-06 15:00'), false)
+})
+
+test('完全不相交不算冲突', function () {
+  assert.strictEqual(conflict.isOverlapping(A_START, A_END, '2026-11-06 18:00', '2026-11-06 19:00'), false)
+})
+
+test('任一时间非法时按不冲突处理（不能抛错）', function () {
+  assert.strictEqual(conflict.isOverlapping('坏时间', A_END, A_START, A_END), false)
+  assert.strictEqual(conflict.isOverlapping(A_START, A_END, A_START, '坏时间'), false)
+})
+
+// ---------------------------------------------------------------------------
+// 3. 冲突列表
+// ---------------------------------------------------------------------------
+group('3. 冲突列表 findConflicts')
+
+const activity = { title: '社团活动', start: '2026-11-06 15:00', end: '2026-11-06 17:00' }
+const schedule = [
+  { title: '高数补习', start: '2026-11-06 15:00', end: '2026-11-06 17:00' },
+  { title: '英语角', start: '2026-11-06 16:00', end: '2026-11-06 18:00' },
+  { title: 'T格式', start: '2026-11-06T15:30', end: '2026-11-06T16:00' },
+  { title: '晨跑', start: '2026-11-06 14:00', end: '2026-11-06 15:00' },
+  { title: '电影', start: '2026-11-06 17:00', end: '2026-11-06 19:00' },
+  { title: '坏数据', start: 'x', end: 'y' }
+]
+
+test('找出全部冲突并保持原顺序', function () {
+  const list = conflict.findConflicts(activity, schedule)
+  assert.deepStrictEqual(list.map(function (item) { return item.title }), ['高数补习', '英语角', 'T格式'])
+})
+
+test('空 / 非法日程不报错', function () {
+  assert.deepStrictEqual(conflict.findConflicts(activity, null), [])
+  assert.deepStrictEqual(conflict.findConflicts(activity, []), [])
+  assert.deepStrictEqual(conflict.findConflicts(null, schedule), [])
+})
+
+test('活动时间非法时返回空数组', function () {
+  assert.deepStrictEqual(conflict.findConflicts({ start: 'bad', end: '2026-11-06 17:00' }, schedule), [])
+  assert.deepStrictEqual(conflict.findConflicts({ start: '2026-11-06 17:00', end: '2026-11-06 15:00' }, schedule), [])
+})
+
+// ---------------------------------------------------------------------------
+// 4. 状态判定
+// ---------------------------------------------------------------------------
+group('4. 状态判定 check')
+
+const NOW = ts('2026-11-03 10:00')
+
+test('没冲突 → ok', function () {
+  const result = conflict.check(activity, [], NOW)
+  assert.strictEqual(result.status, conflict.STATUS.OK)
+  assert.strictEqual(result.text, '可参加')
+  assert.deepStrictEqual(result.conflicts, [])
+})
+
+test('有冲突 → conflict，文案带日程名', function () {
+  const result = conflict.check(activity, schedule, NOW)
+  assert.strictEqual(result.status, conflict.STATUS.CONFLICT)
+  assert.strictEqual(result.text, '与「高数补习」冲突')
+  assert.strictEqual(result.conflicts.length, 3)
+})
+
+test('两小时内开始 → soon', function () {
+  const result = conflict.check({ start: '2026-11-03 11:30', end: '2026-11-03 13:00' }, [], NOW)
+  assert.strictEqual(result.status, conflict.STATUS.SOON)
+})
+
+test('已经结束 → ended', function () {
+  const result = conflict.check({ start: '2026-11-03 08:00', end: '2026-11-03 09:00' }, [], NOW)
+  assert.strictEqual(result.status, conflict.STATUS.ENDED)
+})
+
+test('时间非法 → unknown，不是 conflict', function () {
+  const result = conflict.check({ start: 'bad', end: '2026-11-06 17:00' }, schedule, NOW)
+  assert.strictEqual(result.status, conflict.STATUS.UNKNOWN)
+  assert.strictEqual(result.text, '时间待确认')
+  assert.deepStrictEqual(result.conflicts, [])
+})
+
+// ---------------------------------------------------------------------------
+// 5. 每日空闲区间
+// ---------------------------------------------------------------------------
+group('5. 空闲区间 findFreeSlots')
+
+test('两段课之间留出三段空闲', function () {
+  const day = ts('2026-11-06 00:00')
+  const slots = conflict.findFreeSlots(day, [
+    { start: '2026-11-06 10:00', end: '2026-11-06 12:00' },
+    { start: '2026-11-06 15:00', end: '2026-11-06 17:00' }
+  ])
+  assert.deepStrictEqual(slots, [
+    { start: ts('2026-11-06 08:00'), end: ts('2026-11-06 10:00') },
+    { start: ts('2026-11-06 12:00'), end: ts('2026-11-06 15:00') },
+    { start: ts('2026-11-06 17:00'), end: ts('2026-11-06 22:00') }
+  ])
+})
+
+test('重叠日程先合并', function () {
+  const day = ts('2026-11-06 00:00')
+  const slots = conflict.findFreeSlots(day, [
+    { start: '2026-11-06 10:00', end: '2026-11-06 12:00' },
+    { start: '2026-11-06 11:00', end: '2026-11-06 13:00' }
+  ])
+  assert.deepStrictEqual(slots, [
+    { start: ts('2026-11-06 08:00'), end: ts('2026-11-06 10:00') },
+    { start: ts('2026-11-06 13:00'), end: ts('2026-11-06 22:00') }
+  ])
+})
+
+test('窗口外的日程被裁掉', function () {
+  const day = ts('2026-11-06 00:00')
+  const slots = conflict.findFreeSlots(day, [
+    { start: '2026-11-06 07:00', end: '2026-11-06 09:00' },
+    { start: '2026-11-06 21:00', end: '2026-11-06 23:00' }
+  ])
+  assert.deepStrictEqual(slots, [
+    { start: ts('2026-11-06 09:00'), end: ts('2026-11-06 21:00') }
+  ])
+})
+
+test('没有日程时返回整个窗口', function () {
+  assert.deepStrictEqual(conflict.findFreeSlots(ts('2026-11-06 00:00'), []), [
+    { start: ts('2026-11-06 08:00'), end: ts('2026-11-06 22:00') }
+  ])
+})
+
+test('可自定义每日窗口', function () {
+  assert.deepStrictEqual(
+    conflict.findFreeSlots(ts('2026-11-06 00:00'), [], { dailyStart: '09:30', dailyEnd: '11:15' }),
+    [{ start: ts('2026-11-06 09:30'), end: ts('2026-11-06 11:15') }]
+  )
+})
+
+test('窗口非法时返回空数组', function () {
+  assert.deepStrictEqual(
+    conflict.findFreeSlots(ts('2026-11-06 00:00'), [], { dailyStart: '22:00', dailyEnd: '08:00' }),
+    []
+  )
+})
+
+test('日程时间非法时跳过，不影响其它日程', function () {
+  const day = ts('2026-11-06 00:00')
+  const slots = conflict.findFreeSlots(day, [
+    { start: 'bad', end: '2026-11-06 10:00' },
+    { start: '2026-11-06 15:00', end: '2026-11-06 17:00' }
+  ])
+  assert.deepStrictEqual(slots, [
+    { start: ts('2026-11-06 08:00'), end: ts('2026-11-06 15:00') },
+    { start: ts('2026-11-06 17:00'), end: ts('2026-11-06 22:00') }
+  ])
+})
+
+// ---------------------------------------------------------------------------
+// 6. 替代时段
+// ---------------------------------------------------------------------------
+group('6. 替代时段 suggestSlots')
+
+const busyWeek = [
+  { title: '白天课', start: '2026-11-05 08:00', end: '2026-11-05 19:00' },
+  { title: '高数补习', start: '2026-11-06 15:00', end: '2026-11-06 17:00' }
+]
+
+test('从周四找起：周四 19:00 有空（演示主线的文案）', function () {
+  const slots = conflict.suggestSlots(activity, busyWeek, {
+    from: ts('2026-11-05 00:00'),
+    days: 2,
+    limit: 2,
+    now: 0
+  })
+  assert.deepStrictEqual(slots, [
+    {
+      date: '2026-11-05',
+      start: '2026-11-05 19:00',
+      end: '2026-11-05 21:00',
+      label: '周四 19:00 有空',
+      durationMinutes: 120
+    },
+    {
+      date: '2026-11-06',
+      start: '2026-11-06 08:00',
+      end: '2026-11-06 10:00',
+      label: '周五 08:00 有空',
+      durationMinutes: 120
+    }
+  ])
+})
+
+test('limit 生效', function () {
+  const slots = conflict.suggestSlots(activity, busyWeek, {
+    from: ts('2026-11-05 00:00'),
+    days: 7,
+    limit: 1,
+    now: 0
+  })
+  assert.strictEqual(slots.length, 1)
+  assert.strictEqual(slots[0].label, '周四 19:00 有空')
+})
+
+test('结束时间按活动时长计算，不会超出空闲区间', function () {
+  const slots = conflict.suggestSlots(activity, busyWeek, {
+    from: ts('2026-11-05 00:00'),
+    days: 1,
+    now: 0
+  })
+  assert.strictEqual(slots[0].start, '2026-11-05 19:00')
+  assert.strictEqual(slots[0].end, '2026-11-05 21:00')
+  assert.ok(ts(slots[0].end) <= ts('2026-11-05 22:00'))
+})
+
+test('起始时间按 stepMinutes 对齐', function () {
+  const shortActivity = { start: '2026-11-05 12:07', end: '2026-11-05 13:07' }
+  const slots = conflict.suggestSlots(shortActivity, [
+    { start: '2026-11-05 08:00', end: '2026-11-05 12:07' }
+  ], { from: ts('2026-11-05 00:00'), days: 1, stepMinutes: 30, now: 0 })
+  assert.strictEqual(slots[0].start, '2026-11-05 12:30')
+  assert.strictEqual(slots[0].end, '2026-11-05 13:30')
+})
+
+test('默认跳过已经过去的时段', function () {
+  const slots = conflict.suggestSlots(activity, [
+    { start: '2026-11-06 15:00', end: '2026-11-06 17:00' }
+  ], { from: ts('2026-11-06 00:00'), days: 1, now: ts('2026-11-06 18:00') })
+  assert.strictEqual(slots[0].start, '2026-11-06 18:00')
+})
+
+test('skipPast:false 时保留当天更早的时段', function () {
+  const slots = conflict.suggestSlots(activity, [
+    { start: '2026-11-06 15:00', end: '2026-11-06 17:00' }
+  ], { from: ts('2026-11-06 00:00'), days: 1, now: ts('2026-11-06 18:00'), skipPast: false })
+  assert.strictEqual(slots[0].start, '2026-11-06 08:00')
+})
+
+test('活动时间非法时可用 durationMinutes 兜底', function () {
+  const slots = conflict.suggestSlots({ start: 'bad', end: '' }, [], {
+    from: ts('2026-11-07 00:00'),
+    days: 1,
+    durationMinutes: 60,
+    now: 0
+  })
+  assert.deepStrictEqual(slots, [
+    {
+      date: '2026-11-07',
+      start: '2026-11-07 08:00',
+      end: '2026-11-07 09:00',
+      label: '周六 08:00 有空',
+      durationMinutes: 60
+    }
+  ])
+})
+
+test('既没有活动时长也没有兜底时长时返回空数组', function () {
+  assert.deepStrictEqual(conflict.suggestSlots({}, [], { from: ts('2026-11-07 00:00') }), [])
+})
+
+test('空闲区间放不下活动时长时不硬塞', function () {
+  const slots = conflict.suggestSlots(activity, [
+    { start: '2026-11-06 08:00', end: '2026-11-06 16:30' },
+    { start: '2026-11-06 17:30', end: '2026-11-06 22:00' }
+  ], { from: ts('2026-11-06 00:00'), days: 1, now: 0 })
+  assert.deepStrictEqual(slots, [])
+})
+
+// ---------------------------------------------------------------------------
+// 7. 接口稳定性
+// ---------------------------------------------------------------------------
+group('7. 接口与常量')
+
+test('STATUS 常量齐全', function () {
+  assert.strictEqual(conflict.STATUS.OK, 'ok')
+  assert.strictEqual(conflict.STATUS.SOON, 'soon')
+  assert.strictEqual(conflict.STATUS.CONFLICT, 'conflict')
+  assert.strictEqual(conflict.STATUS.ENDED, 'ended')
+  assert.strictEqual(conflict.STATUS.UNKNOWN, 'unknown')
+})
+
+test('导出的方法都是函数', function () {
+  const names = ['toTimestamp', 'formatTimestamp', 'isOverlapping', 'findConflicts', 'check', 'findFreeSlots', 'suggestSlots']
+  names.forEach(function (name) {
+    assert.strictEqual(typeof conflict[name], 'function', name + ' 应该是函数')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// 收尾
+// ---------------------------------------------------------------------------
+console.log('\n----------------------------------------')
+if (failures.length === 0) {
+  console.log('全部通过：' + total + ' 项')
+} else {
+  console.log('失败 ' + failures.length + ' / ' + total + ' 项')
+  failures.forEach(function (item) {
+    console.log('- ' + item.name)
+  })
+  process.exitCode = 1
+}
