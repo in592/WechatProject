@@ -80,15 +80,6 @@
     <button class="add" bindtap="onAdd">添加日程</button>
   </view>
 
-  <view class="ocr-card" wx:if="{{ocrLines.length > 0}}">
-    <view class="ocr-head">
-      <text class="ocr-title">识别结果</text>
-      <text class="ocr-clear" bindtap="onOcrClear">清空</text>
-    </view>
-    <view class="ocr-tip">点一条，把课程名和地点填入上面的表单，再确认时间</view>
-    <view class="ocr-line" wx:for="{{ocrLines}}" wx:key="*this" data-index="{{index}}" bindtap="onOcrLineTap">{{item}}</view>
-  </view>
-
   <view class="list-head">
     <text>已添加</text>
     <text class="count">{{list.length}} 条</text>
@@ -114,4 +105,81 @@
   </view>
 
   <view class="hint">添加后去活动详情点「报名」，冲突会被拦截并给出替代时段。</view>
+
+  <view class="modal-mask" wx:if="{{ocrModalVisible}}" catchtap="onOcrModalClose">
+    <scroll-view class="ocr-modal" scroll-y catchtap="noop">
+      <view class="modal-head">
+        <text class="modal-title">识别结果</text>
+        <text class="modal-close" bindtap="onOcrModalClose">×</text>
+      </view>
+      <view class="modal-tip">点一条识别结果，修改课程名/地点/节次，确认后加入日程</view>
+
+      <scroll-view class="modal-lines" scroll-y>
+        <view
+          class="modal-line {{ocrSelectedIndex === index ? 'active' : ''}}"
+          wx:for="{{ocrLines}}"
+          wx:key="*this"
+          data-index="{{index}}"
+          bindtap="onOcrLineTap"
+        >{{item}}</view>
+      </scroll-view>
+
+      <view class="modal-field">
+        <text class="modal-label">课程名</text>
+        <input class="modal-input" value="{{title}}" bindinput="onTitleInput" />
+      </view>
+
+      <view class="modal-field">
+        <text class="modal-label">地点</text>
+        <input class="modal-input" value="{{location}}" bindinput="onLocationInput" />
+      </view>
+
+      <view class="modal-row">
+        <view class="modal-half">
+          <text class="modal-label">日期</text>
+          <picker mode="date" value="{{date}}" bindchange="onDateChange">
+            <view class="modal-picker">{{date}}</view>
+          </picker>
+        </view>
+        <view class="modal-half">
+          <text class="modal-label">前一节不同课</text>
+          <switch checked="{{changeBreak}}" color="#65020A" bindchange="onChangeBreakChange" />
+        </view>
+      </view>
+
+      <view class="modal-row">
+        <view class="modal-half">
+          <text class="modal-label">开始节次</text>
+          <picker mode="selector" range="{{periodLabels}}" value="{{startPeriodIndex}}" bindchange="onStartPeriodChange">
+            <view class="modal-picker">{{periodLabels[startPeriodIndex]}}</view>
+          </picker>
+        </view>
+        <view class="modal-half">
+          <text class="modal-label">结束节次</text>
+          <picker mode="selector" range="{{periodLabels}}" value="{{endPeriodIndex}}" bindchange="onEndPeriodChange">
+            <view class="modal-picker">{{periodLabels[endPeriodIndex]}}</view>
+          </picker>
+        </view>
+      </view>
+
+      <view class="modal-row">
+        <view class="modal-half">
+          <text class="modal-label">开始</text>
+          <picker mode="time" value="{{startTime}}" bindchange="onStartTimeChange">
+            <view class="modal-picker">{{startTime}}</view>
+          </picker>
+        </view>
+        <view class="modal-half">
+          <text class="modal-label">结束</text>
+          <picker mode="time" value="{{endTime}}" bindchange="onEndTimeChange">
+            <view class="modal-picker">{{endTime}}</view>
+          </picker>
+        </view>
+      </view>
+
+      <view class="modal-error" wx:if="{{error}}">{{error}}</view>
+
+      <button class="modal-add" bindtap="onOcrAdd">加入日程</button>
+    </scroll-view>
+  </view>
 </view>

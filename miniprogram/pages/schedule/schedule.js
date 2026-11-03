@@ -107,7 +107,9 @@ Page({
     list: [],
     error: '',
     ocrLines: [],
-    ocrLoading: false
+    ocrLoading: false,
+    ocrModalVisible: false,
+    ocrSelectedIndex: -1
   },
 
   onLoad: function () {
@@ -298,13 +300,19 @@ Page({
         ? data.lines.filter(function (line) { return line && line.trim() }).map(compactText)
         : []
 
-      that.setData({ ocrLines: lines })
-
       if (lines.length === 0) {
+        that.setData({ ocrLines: [] })
         wx.showToast({ title: '没识别到文字，换张清晰点的', icon: 'none' })
-      } else {
-        wx.showToast({ title: '识别完成，点一条填入', icon: 'none' })
+        return
       }
+
+      that.setData({
+        ocrLines: lines,
+        ocrModalVisible: true,
+        ocrSelectedIndex: -1
+      }, function () {
+        that.selectOcrLine(0)
+      })
     }).catch(function (err) {
       wx.showToast({ title: (err && err.message) || '识别失败', icon: 'none' })
     }).then(function () {
@@ -314,7 +322,10 @@ Page({
   },
 
   onOcrLineTap: function (event) {
-    const index = Number(event.currentTarget.dataset.index)
+    this.selectOcrLine(Number(event.currentTarget.dataset.index))
+  },
+
+  selectOcrLine: function (index) {
     const raw = this.data.ocrLines[index]
     if (!raw) return
 
@@ -342,29 +353,46 @@ Page({
       title: title,
       location: location,
       date: date,
+      ocrSelectedIndex: index,
       error: ''
     })
 
-    wx.showToast({ title: '已填入，请确认时间', icon: 'none' })
+    wx.showToast({ title: '已填入，请确认节次和时间', icon: 'none' })
   },
 
-  onOcrClear: function () {
-    this.setData({ ocrLines: [] })
+  onOcrModalClose: function () {
+    this.setData({ ocrModalVisible: false })
+  },
+
+  noop: function () {},
+
+  onOcrAdd: function () {
+    if (this.addScheduleFromForm()) {
+      this.setData({
+        ocrModalVisible: false,
+        ocrLines: [],
+        ocrSelectedIndex: -1
+      })
+    }
   },
 
   onAdd: function () {
+    this.addScheduleFromForm()
+  },
+
+  addScheduleFromForm: function () {
     const title = String(this.data.title || '').trim()
 
     if (!title) {
       this.setData({ error: '请填写日程名称' })
       wx.showToast({ title: '请填写名称', icon: 'none' })
-      return
+      return false
     }
 
     if (!this.data.date) {
       this.setData({ error: '请选择日期' })
       wx.showToast({ title: '请选择日期', icon: 'none' })
-      return
+      return false
     }
 
     const start = this.data.date + ' ' + this.data.startTime
@@ -375,7 +403,7 @@ Page({
     if (!isFinite(startTs) || !isFinite(endTs) || endTs <= startTs) {
       this.setData({ error: '结束时间要晚于开始时间' })
       wx.showToast({ title: '结束时间要晚于开始时间', icon: 'none' })
-      return
+      return false
     }
 
     const item = {
@@ -391,6 +419,7 @@ Page({
     this.setData({ title: '', location: '', error: '' })
     this.loadList()
     wx.showToast({ title: '已添加', icon: 'success' })
+    return true
   },
 
   onDelete: function (event) {

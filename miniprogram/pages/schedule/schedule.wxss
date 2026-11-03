@@ -282,3 +282,131 @@
   line-height: 1.6;
   text-align: center;
 }
+
+.modal-mask {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(31, 35, 41, 0.45);
+}
+
+.ocr-modal {
+  box-sizing: border-box;
+  width: 100%;
+  height: 86vh;
+  padding: 28rpx 32rpx;
+  padding-bottom: calc(28rpx + env(safe-area-inset-bottom));
+  border-radius: 32rpx 32rpx 0 0;
+  background: #FFF8F6;
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  color: #65020A;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.modal-close {
+  padding: 0 10rpx;
+  color: #8A9099;
+  font-size: 44rpx;
+  line-height: 1;
+}
+
+.modal-tip {
+  margin-top: 8rpx;
+  color: #8A9099;
+  font-size: 22rpx;
+  line-height: 1.5;
+}
+
+.modal-lines {
+  max-height: 220rpx;
+  margin-top: 16rpx;
+}
+
+.modal-line {
+  margin-bottom: 10rpx;
+  padding: 14rpx 18rpx;
+  border: 2rpx solid transparent;
+  border-radius: 14rpx;
+  background: #FFFFFF;
+  color: #1F2329;
+  font-size: 24rpx;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.modal-line.active {
+  border-color: #65020A;
+  background: #FFE4F1;
+}
+
+.modal-field {
+  margin-top: 16rpx;
+}
+
+.modal-label {
+  display: block;
+  margin-bottom: 8rpx;
+  color: #5A6069;
+  font-size: 22rpx;
+}
+
+.modal-input,
+.modal-picker {
+  box-sizing: border-box;
+  height: 70rpx;
+  padding: 0 18rpx;
+  border-radius: 14rpx;
+  background: #FFFFFF;
+  color: #1F2329;
+  font-size: 26rpx;
+  line-height: 70rpx;
+}
+
+.modal-row {
+  display: flex;
+  margin-top: 16rpx;
+}
+
+.modal-half {
+  flex: 1;
+}
+
+.modal-half + .modal-half {
+  margin-left: 16rpx;
+}
+
+.modal-add {
+  width: 100%;
+  height: 80rpx;
+  margin-top: 28rpx;
+  border-radius: 40rpx;
+  background: #65020A;
+  color: #FFFFFF;
+  font-size: 28rpx;
+  line-height: 80rpx;
+}
+
+.modal-error {
+  margin-top: 16rpx;
+  color: #D9365F;
+  font-size: 24rpx;
+  text-align: center;
+}
+
+.modal-add::after {
+  border: none;
+}
