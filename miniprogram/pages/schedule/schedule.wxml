@@ -1,5 +1,70 @@
 <view class="page">
-  <view class="title">我的日程</view>
-  <view class="subtitle">日程页（建设中）</view>
-  <view class="hint">后续实现：添加课程 / 日程，用于报名冲突检测</view>
+  <view class="header">
+    <view class="title">我的日程</view>
+    <view class="subtitle">加一条课表，报名时自动帮你避开冲突</view>
+  </view>
+
+  <view class="form-card">
+    <view class="field">
+      <text class="label">日程名称</text>
+      <input
+        class="input"
+        placeholder="例：高数补习"
+        maxlength="30"
+        value="{{title}}"
+        bindinput="onTitleInput"
+      />
+    </view>
+
+    <view class="field">
+      <text class="label">日期</text>
+      <picker mode="date" value="{{date}}" bindchange="onDateChange">
+        <view class="picker">{{date}}</view>
+      </picker>
+    </view>
+
+    <view class="time-row">
+      <view class="field half">
+        <text class="label">开始</text>
+        <picker mode="time" value="{{startTime}}" bindchange="onStartTimeChange">
+          <view class="picker">{{startTime}}</view>
+        </picker>
+      </view>
+      <view class="field half">
+        <text class="label">结束</text>
+        <picker mode="time" value="{{endTime}}" bindchange="onEndTimeChange">
+          <view class="picker">{{endTime}}</view>
+        </picker>
+      </view>
+    </view>
+
+    <view class="error" wx:if="{{error}}">{{error}}</view>
+    <button class="add" bindtap="onAdd">添加日程</button>
+  </view>
+
+  <view class="list-head">
+    <text>已添加</text>
+    <text class="count">{{list.length}} 条</text>
+  </view>
+
+  <view class="empty" wx:if="{{list.length === 0}}">
+    <view class="empty-title">还没有日程</view>
+    <view class="empty-desc">先加一条「高数补习」，再去活动详情试报名</view>
+  </view>
+
+  <view class="list" wx:else>
+    <view class="item" wx:for="{{list}}" wx:key="id">
+      <view class="date-badge">
+        <text class="date">{{item.dateText}}</text>
+        <text class="week">{{item.weekdayText}}</text>
+      </view>
+      <view class="item-body">
+        <view class="item-title">{{item.title}}</view>
+        <view class="item-time">{{item.timeText}}</view>
+      </view>
+      <button class="delete" data-id="{{item.id}}" bindtap="onDelete">删除</button>
+    </view>
+  </view>
+
+  <view class="hint">添加后去活动详情点「报名」，冲突会被拦截并给出替代时段。</view>
 </view>

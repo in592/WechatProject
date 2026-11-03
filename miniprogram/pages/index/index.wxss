@@ -8,6 +8,22 @@
   padding: 8rpx 4rpx 0;
 }
 
+.hello-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.schedule-link {
+  flex: none;
+  margin-top: 4rpx;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  background: #FFE4F1;
+  color: #65020A;
+  font-size: 22rpx;
+}
+
 .hello-title {
   font-size: 44rpx;
   font-weight: 600;
