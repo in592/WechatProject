@@ -5,6 +5,11 @@
   </view>
 
   <view class="form-card">
+    <view class="form-head">
+      <text class="form-title">添加日程</text>
+      <button class="ocr-btn" bindtap="onOcrTap" loading="{{ocrLoading}}">拍照识别</button>
+    </view>
+
     <view class="field">
       <text class="label">日程名称</text>
       <input
@@ -13,6 +18,17 @@
         maxlength="30"
         value="{{title}}"
         bindinput="onTitleInput"
+      />
+    </view>
+
+    <view class="field">
+      <text class="label">地点（可选）</text>
+      <input
+        class="input"
+        placeholder="例：教301"
+        maxlength="40"
+        value="{{location}}"
+        bindinput="onLocationInput"
       />
     </view>
 
@@ -42,6 +58,15 @@
     <button class="add" bindtap="onAdd">添加日程</button>
   </view>
 
+  <view class="ocr-card" wx:if="{{ocrLines.length > 0}}">
+    <view class="ocr-head">
+      <text class="ocr-title">识别结果</text>
+      <text class="ocr-clear" bindtap="onOcrClear">清空</text>
+    </view>
+    <view class="ocr-tip">点一条，把课程名和地点填入上面的表单，再确认时间</view>
+    <view class="ocr-line" wx:for="{{ocrLines}}" wx:key="*this" data-index="{{index}}" bindtap="onOcrLineTap">{{item}}</view>
+  </view>
+
   <view class="list-head">
     <text>已添加</text>
     <text class="count">{{list.length}} 条</text>
@@ -60,7 +85,7 @@
       </view>
       <view class="item-body">
         <view class="item-title">{{item.title}}</view>
-        <view class="item-time">{{item.timeText}}</view>
+        <view class="item-time">{{item.timeText}}<text wx:if="{{item.location}}"> · {{item.location}}</text></view>
       </view>
       <button class="delete" data-id="{{item.id}}" bindtap="onDelete">删除</button>
     </view>

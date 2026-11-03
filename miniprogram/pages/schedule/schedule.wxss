@@ -30,6 +30,35 @@
   box-shadow: 0 8rpx 24rpx rgba(31, 35, 41, 0.05);
 }
 
+.form-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.form-title {
+  color: #65020A;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.ocr-btn {
+  width: auto;
+  height: 60rpx;
+  margin: 0;
+  padding: 0 20rpx;
+  border-radius: 30rpx;
+  background: #FFE4F1;
+  color: #65020A;
+  font-size: 22rpx;
+  line-height: 60rpx;
+}
+
+.ocr-btn::after {
+  border: none;
+}
+
 .field {
   margin-bottom: 20rpx;
 }
@@ -69,6 +98,49 @@
   margin: 0 0 16rpx;
   color: #D9365F;
   font-size: 24rpx;
+}
+
+.ocr-card {
+  margin-top: 20rpx;
+  padding: 24rpx;
+  border-radius: 24rpx;
+  background: #FFFFFF;
+  box-shadow: 0 8rpx 24rpx rgba(31, 35, 41, 0.05);
+}
+
+.ocr-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ocr-title {
+  color: #65020A;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.ocr-clear {
+  color: #D9365F;
+  font-size: 22rpx;
+}
+
+.ocr-tip {
+  margin-top: 8rpx;
+  color: #8A9099;
+  font-size: 22rpx;
+  line-height: 1.5;
+}
+
+.ocr-line {
+  margin-top: 12rpx;
+  padding: 16rpx 18rpx;
+  border-radius: 14rpx;
+  background: #FFF8F6;
+  color: #1F2329;
+  font-size: 24rpx;
+  line-height: 1.5;
+  word-break: break-all;
 }
 
 .add {

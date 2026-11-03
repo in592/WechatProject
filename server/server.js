@@ -12,15 +12,18 @@
 
 const http = require('http')
 const fs = require('fs')
+const os = require('os')
 const crypto = require('crypto')
 const path = require('path')
+const { spawn } = require('child_process')
 const parser = require('../miniprogram/utils/parser')
 
 const HOST = '127.0.0.1'
 const PORT = 3000
 const DATA_FILE = path.join(__dirname, 'data.json')
-const MAX_BODY = 1024 * 1024
+const MAX_BODY = 12 * 1024 * 1024
 const PUBLIC_DIR = path.join(__dirname, 'public')
+const OCR_SCRIPT = path.join(__dirname, 'ocr.ps1')
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -230,6 +233,137 @@ const server = http.createServer(function (req, res) {
           type: guessType(text)
         },
         warnings: parsed.warnings
+      })
+    })
+    return
+  }
+
+  // 拍照 OCR：只在 Windows 本机识别，不上传第三方
+  if (req.method === 'POST' && pathname === '/api/ocr') {
+    readJsonBody(req, function (err, body) {
+      if (err) {
+        const tooLarge = err.message === 'TOO_LARGE'
+        sendJson(res, tooLarge ? 413 : 400, {
+          ok: false,
+          error: tooLarge ? '图片太大' : '请求体不是合法 JSON'
+        })
+        return
+      }
+
+      const payload = body && typeof body === 'object' ? body : {}
+      const image = typeof payload.image === 'string' ? payload.image.trim() : ''
+      if (!image) {
+        sendJson(res, 400, { ok: false, error: 'image 不能为空' })
+        return
+      }
+
+      const base64 = image.replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, '')
+      let imageBuffer = null
+      try {
+        imageBuffer = Buffer.from(base64, 'base64')
+      } catch (decodeErr) {
+        imageBuffer = null
+      }
+
+      if (!imageBuffer || imageBuffer.length < 100) {
+        sendJson(res, 400, { ok: false, error: '图片数据无效' })
+        return
+      }
+      if (imageBuffer.length > 8 * 1024 * 1024) {
+        sendJson(res, 413, { ok: false, error: '图片不能超过 8MB' })
+        return
+      }
+
+      const isPng = imageBuffer[0] === 0x89 && imageBuffer[1] === 0x50
+      const isJpg = imageBuffer[0] === 0xFF && imageBuffer[1] === 0xD8
+      if (!isPng && !isJpg) {
+        sendJson(res, 400, { ok: false, error: '只支持 PNG / JPG 图片' })
+        return
+      }
+
+      const tempFile = path.join(os.tmpdir(), 'campus-ocr-' + crypto.randomUUID() + '.png')
+      const outFile = tempFile + '.json'
+
+      try {
+        fs.writeFileSync(tempFile, imageBuffer)
+      } catch (writeErr) {
+        sendJson(res, 500, { ok: false, error: '临时图片写入失败' })
+        return
+      }
+
+      let settled = false
+      let timer = null
+
+      function cleanup() {
+        try {
+          fs.unlinkSync(tempFile)
+        } catch (unlinkErr) {
+          // 忽略
+        }
+        try {
+          fs.unlinkSync(outFile)
+        } catch (unlinkErr) {
+          // 忽略
+        }
+      }
+
+      function finish(statusCode, payload) {
+        if (settled) return
+        settled = true
+        if (timer) clearTimeout(timer)
+        cleanup()
+        sendJson(res, statusCode, payload)
+      }
+
+      // 用 stdio:'ignore' + 文件输出，避开沙箱对管道抓输出的限制
+      const child = spawn('powershell.exe', [
+        '-NoProfile',
+        '-ExecutionPolicy', 'Bypass',
+        '-File', OCR_SCRIPT,
+        '-Path', tempFile,
+        '-OutPath', outFile
+      ], {
+        windowsHide: true,
+        stdio: 'ignore'
+      })
+
+      timer = setTimeout(function () {
+        try {
+          child.kill()
+        } catch (killErr) {
+          // 忽略
+        }
+        finish(500, { ok: false, error: 'OCR 超时，请重试或换一张更清晰的图片' })
+      }, 30000)
+
+      child.on('error', function (spawnErr) {
+        finish(500, { ok: false, error: 'OCR 启动失败：' + (spawnErr.message || '未知错误') })
+      })
+
+      child.on('close', function (code) {
+        if (settled) return
+
+        let result = null
+        try {
+          result = JSON.parse(fs.readFileSync(outFile, 'utf8'))
+        } catch (readErr) {
+          result = null
+        }
+
+        if (!result) {
+          finish(500, { ok: false, error: 'OCR 没有返回结果（exit ' + code + '）' })
+          return
+        }
+        if (result.ok === false) {
+          finish(500, { ok: false, error: result.error || 'OCR 识别失败' })
+          return
+        }
+
+        const lines = Array.isArray(result.lines)
+          ? result.lines.filter(function (line) { return typeof line === 'string' && line.trim() })
+          : []
+
+        finish(200, { ok: true, lines: lines, text: lines.join('\n') })
       })
     })
     return
