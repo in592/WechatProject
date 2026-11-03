@@ -1,0 +1,10 @@
+# 微信开发者工具本地配置（每台机器不同）
+miniprogram/project.private.config.json
+
+# 运行时数据，不入库
+server/data.json
+
+# 依赖与系统文件
+node_modules/
+.DS_Store
+Thumbs.db

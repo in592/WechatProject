@@ -1,0 +1,5 @@
+<view class="page">
+  <view class="title">校园管家</view>
+  <view class="subtitle">登录页（建设中）</view>
+  <view class="hint">学号 + 姓名登录，后续实现</view>
+</view>

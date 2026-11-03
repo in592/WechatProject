@@ -1,0 +1,5 @@
+<view class="page">
+  <view class="title">我的日程</view>
+  <view class="subtitle">日程页（建设中）</view>
+  <view class="hint">后续实现：添加课程 / 日程，用于报名冲突检测</view>
+</view>
