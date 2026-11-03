@@ -173,6 +173,30 @@ const server = http.createServer(function (req, res) {
     return
   }
 
+  // 单条活动：详情页用
+  const singleMatch = pathname.match(/^\/api\/activities\/([^/]+)$/)
+  if (req.method === 'GET' && singleMatch) {
+    let singleId = singleMatch[1]
+    try {
+      singleId = decodeURIComponent(singleId)
+    } catch (err) {
+      // 保持原样
+    }
+
+    const data = readData()
+    const activity = Array.isArray(data.activities)
+      ? data.activities.find(function (item) { return item.id === singleId })
+      : null
+
+    if (!activity) {
+      sendJson(res, 404, { ok: false, error: '活动不存在' })
+      return
+    }
+
+    sendJson(res, 200, { ok: true, activity: activity })
+    return
+  }
+
   // 只解析不入库，给管理后台做预览
   if (req.method === 'POST' && pathname === '/api/parse') {
     readJsonBody(req, function (err, body) {
@@ -202,6 +226,7 @@ const server = http.createServer(function (req, res) {
           end: parsed.activity.end,
           location: parsed.activity.location,
           credit: parsed.activity.credit,
+          organizer: parsed.activity.organizer,
           type: guessType(text)
         },
         warnings: parsed.warnings
@@ -253,6 +278,7 @@ const server = http.createServer(function (req, res) {
         end: parsed.activity.end,
         location: parsed.activity.location,
         credit: parsed.activity.credit,
+        organizer: parsed.activity.organizer,
         type: guessType(text),
         source: source,
         rawText: text,
@@ -343,6 +369,10 @@ const server = http.createServer(function (req, res) {
 
       if (payload.type !== undefined) {
         next.type = String(payload.type || '其他').trim() || '其他'
+      }
+
+      if (payload.organizer !== undefined) {
+        next.organizer = String(payload.organizer || '').trim()
       }
 
       if (invalid) {

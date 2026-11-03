@@ -389,13 +389,14 @@ group('8. 通知解析 parse')
 const NOW_DATE = new Date(2026, 10, 3, 10, 0, 0, 0)
 
 test('完整通知：标题、时间、地点、学分', function () {
-  const result = parser.parse('【活动通知】周五下午3点到5点，在图书馆三楼报告厅举办《人工智能前沿讲座》，可获0.5学分，欢迎参加！', { now: NOW_DATE })
+  const result = parser.parse('【活动通知】周五下午3点到5点，在图书馆三楼报告厅举办《人工智能前沿讲座》，由计算机学院主办，可获0.5学分，欢迎参加！', { now: NOW_DATE })
   assert.strictEqual(result.ok, true)
   assert.strictEqual(result.activity.title, '人工智能前沿讲座')
   assert.strictEqual(result.activity.start, '2026-11-06 15:00')
   assert.strictEqual(result.activity.end, '2026-11-06 17:00')
   assert.strictEqual(result.activity.location, '图书馆三楼报告厅')
   assert.strictEqual(result.activity.credit, 0.5)
+  assert.strictEqual(result.activity.organizer, '计算机学院')
   assert.deepStrictEqual(result.warnings, [])
 })
 

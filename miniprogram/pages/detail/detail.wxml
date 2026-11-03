@@ -1,5 +1,52 @@
 <view class="page">
-  <view class="title">活动详情</view>
-  <view class="subtitle">详情页（建设中）</view>
-  <view class="hint">后续实现：活动信息 + 报名冲突拦截 + 替代时段</view>
+  <view class="state" wx:if="{{loading}}">
+    <view class="spinner"></view>
+    <view>加载中…</view>
+  </view>
+
+  <view class="state" wx:elif="{{error}}">
+    <view class="state-title">加载失败</view>
+    <view class="state-desc">{{error}}</view>
+    <button class="retry" bindtap="onRetry">重试</button>
+  </view>
+
+  <block wx:elif="{{activity}}">
+    <view class="hero">
+      <text class="tag {{typeClass}}">{{typeText}}</text>
+      <view class="title">{{activity.title}}</view>
+      <view class="time">{{startText}}<text wx:if="{{endText}}"> - {{endText}}</text></view>
+    </view>
+
+    <view class="info-card">
+      <view class="row">
+        <text class="label">时间</text>
+        <text class="value">{{startText}}<text wx:if="{{endText}}"> - {{endText}}</text></text>
+      </view>
+      <view class="row">
+        <text class="label">地点</text>
+        <text class="value">{{activity.location || '未标注'}}</text>
+      </view>
+      <view class="row">
+        <text class="label">学分</text>
+        <text class="value">{{creditText}}</text>
+      </view>
+      <view class="row">
+        <text class="label">类型</text>
+        <text class="value">{{typeText}}</text>
+      </view>
+      <view class="row">
+        <text class="label">主办方</text>
+        <text class="value">{{organizerText}}</text>
+      </view>
+    </view>
+
+    <view class="notice" wx:if="{{activity.rawText}}">
+      <view class="notice-title">原始通知</view>
+      <view class="notice-text">{{activity.rawText}}</view>
+    </view>
+
+    <view class="action-bar">
+      <button class="signup" bindtap="onSignup" loading="{{signing}}">报名</button>
+    </view>
+  </block>
 </view>

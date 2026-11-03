@@ -254,13 +254,24 @@ function extractCredit(text) {
   return null
 }
 
+function extractOrganizer(text) {
+  const labeled = text.match(/(?:主办方|主办单位|主办|承办方|承办单位|承办)\s*[:：]\s*([^\n，。；;,]{1,40})/)
+  if (labeled) return labeled[1].trim()
+
+  const by = text.match(/由\s*([^\n，。；;,]{2,40}?)\s*(?:主办|承办|协办)/)
+  if (by) return by[1].trim()
+
+  return ''
+}
+
 function emptyActivity() {
   return {
     title: '未命名活动',
     start: '',
     end: '',
     location: '',
-    credit: null
+    credit: null,
+    organizer: ''
   }
 }
 
@@ -286,6 +297,7 @@ function parse(text, options) {
   const timeInfo = extractTime(raw)
   const location = extractLocation(raw)
   const credit = extractCredit(raw)
+  const organizer = extractOrganizer(raw)
 
   const warnings = []
   let start = null
@@ -343,7 +355,8 @@ function parse(text, options) {
       start: start ? formatDateTime(start) : '',
       end: end ? formatDateTime(end) : '',
       location: location,
-      credit: credit
+      credit: credit,
+      organizer: organizer
     },
     warnings: warnings
   }
