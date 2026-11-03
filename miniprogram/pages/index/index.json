@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "校园管家"
+  "navigationBarTitleText": "校园管家",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark",
+  "backgroundColor": "#f5f6f8"
 }

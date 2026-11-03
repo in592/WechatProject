@@ -183,19 +183,21 @@ function extractPageBody(jsText) {
 function extractTopLevelKeys(body) {
   const keys = new Set()
   let depth = 0
+  let expectKey = true
   let i = 0
 
   while (i < body.length) {
     const ch = body[i]
 
     if (ch === '"' || ch === "'" || ch === '`') {
-      if (depth === 0 && ch !== '`') {
+      if (depth === 0 && expectKey && ch !== '`') {
         const end = skipString(body, i)
         const raw = body.slice(i + 1, end - 1)
         let j = end
         while (j < body.length && /\s/.test(body[j])) j++
         if (body[j] === ':') keys.add(raw)
         i = end
+        expectKey = false
         continue
       }
       i = skipString(body, i)
@@ -222,15 +224,33 @@ function extractTopLevelKeys(body) {
       continue
     }
 
-    if (depth === 0 && /[A-Za-z_$]/.test(ch)) {
-      const start = i
-      while (i < body.length && /[\w$]/.test(body[i])) i++
+    if (depth === 0 && ch === ',') {
+      expectKey = true
+      i++
+      continue
+    }
 
-      const name = body.slice(start, i)
-      let j = i
-      while (j < body.length && /\s/.test(body[j])) j++
+    if (depth === 0 && expectKey) {
+      if (/\s/.test(ch)) {
+        i++
+        continue
+      }
 
-      if (body[j] === ':' || body[j] === '(') keys.add(name)
+      if (/[A-Za-z_$]/.test(ch)) {
+        const start = i
+        while (i < body.length && /[\w$]/.test(body[i])) i++
+
+        const name = body.slice(start, i)
+        let j = i
+        while (j < body.length && /\s/.test(body[j])) j++
+
+        if (body[j] === ':' || body[j] === '(') keys.add(name)
+        expectKey = false
+        continue
+      }
+
+      // 跳过展开运算符等非标准 key
+      i++
       continue
     }
 

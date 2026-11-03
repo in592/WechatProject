@@ -1,5 +1,76 @@
 <view class="page">
-  <view class="title">校园管家</view>
-  <view class="subtitle">活动列表（建设中）</view>
-  <view class="hint">后续实现：搜索、类型筛选、下拉刷新</view>
+  <view class="top">
+    <view class="hello">
+      <view class="hello-title">{{userName ? '你好，' + userName : '你好，同学'}}</view>
+      <view class="hello-sub">今天想去哪场活动？</view>
+    </view>
+
+    <view class="search">
+      <input
+        class="search-input"
+        placeholder="搜索活动标题 / 地点"
+        value="{{keyword}}"
+        confirm-type="search"
+        bindinput="onSearchInput"
+      />
+    </view>
+
+    <scroll-view class="type-scroll" scroll-x>
+      <view
+        class="type-tab {{activeType === item ? 'active' : ''}}"
+        wx:for="{{typeOptions}}"
+        wx:key="*this"
+        data-type="{{item}}"
+        bindtap="onTypeTap"
+      >{{item}}</view>
+    </scroll-view>
+  </view>
+
+  <view class="cache-banner" wx:if="{{fromCache}}">网络异常，正在显示本地缓存</view>
+
+  <view class="state" wx:if="{{loading}}">
+    <view class="spinner"></view>
+    <view>加载中…</view>
+  </view>
+
+  <view class="state" wx:elif="{{error}}">
+    <view class="state-title">网络异常</view>
+    <view class="state-desc">{{error}}</view>
+    <button class="retry" bindtap="onRetry">重试</button>
+  </view>
+
+  <view class="state" wx:elif="{{filtered.length === 0}}">
+    <view class="state-title">{{activities.length === 0 ? '还没有活动' : '没有匹配的活动'}}</view>
+    <view class="state-desc">{{activities.length === 0 ? '去网页后台粘贴一条通知，导入后会出现在这里' : '换个关键词或类型试试'}}</view>
+  </view>
+
+  <view class="list" wx:else>
+    <view
+      class="card"
+      wx:for="{{filtered}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onCardTap"
+      hover-class="card-hover"
+    >
+      <view class="card-body">
+        <view class="card-title">{{item.title}}</view>
+        <view class="card-meta">
+          <view class="meta-row">
+            <text class="meta-label">时间</text>
+            <text>{{item.dateText}} {{item.timeText}}</text>
+          </view>
+          <view class="meta-row">
+            <text class="meta-label">地点</text>
+            <text>{{item.location || '待定'}}</text>
+          </view>
+        </view>
+        <view class="card-foot">
+          <text class="tag {{item.typeClass}}">{{item.typeText}}</text>
+          <text class="credit" wx:if="{{item.creditText}}">{{item.creditText}}</text>
+        </view>
+      </view>
+      <view class="arrow">›</view>
+    </view>
+  </view>
 </view>
