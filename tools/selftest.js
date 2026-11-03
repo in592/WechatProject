@@ -1,5 +1,5 @@
 /**
- * tools/selftest.js —— utils/conflict.js 自测
+ * tools/selftest.js —— utils/conflict.js + utils/parser.js 自测
  *
  * 零依赖，直接跑：
  *   node tools/selftest.js
@@ -11,6 +11,7 @@ const assert = require('assert')
 const path = require('path')
 
 const conflict = require(path.join(__dirname, '..', 'miniprogram', 'utils', 'conflict.js'))
+const parser = require(path.join(__dirname, '..', 'miniprogram', 'utils', 'parser.js'))
 
 const ts = conflict.toTimestamp
 
@@ -378,6 +379,82 @@ test('导出的方法都是函数', function () {
   names.forEach(function (name) {
     assert.strictEqual(typeof conflict[name], 'function', name + ' 应该是函数')
   })
+})
+
+// ---------------------------------------------------------------------------
+// 8. 通知解析
+// ---------------------------------------------------------------------------
+group('8. 通知解析 parse')
+
+const NOW_DATE = new Date(2026, 10, 3, 10, 0, 0, 0)
+
+test('完整通知：标题、时间、地点、学分', function () {
+  const result = parser.parse('【活动通知】周五下午3点到5点，在图书馆三楼报告厅举办《人工智能前沿讲座》，可获0.5学分，欢迎参加！', { now: NOW_DATE })
+  assert.strictEqual(result.ok, true)
+  assert.strictEqual(result.activity.title, '人工智能前沿讲座')
+  assert.strictEqual(result.activity.start, '2026-11-06 15:00')
+  assert.strictEqual(result.activity.end, '2026-11-06 17:00')
+  assert.strictEqual(result.activity.location, '图书馆三楼报告厅')
+  assert.strictEqual(result.activity.credit, 0.5)
+  assert.deepStrictEqual(result.warnings, [])
+})
+
+test('带字段标签的通知', function () {
+  const text = [
+    '活动主题：校园歌手大赛',
+    '时间：2026年11月7日 19:00-21:30',
+    '地点：大学生活动中心',
+    '学分：1.5'
+  ].join('\n')
+  const result = parser.parse(text, { now: NOW_DATE })
+  assert.strictEqual(result.ok, true)
+  assert.strictEqual(result.activity.title, '校园歌手大赛')
+  assert.strictEqual(result.activity.start, '2026-11-07 19:00')
+  assert.strictEqual(result.activity.end, '2026-11-07 21:30')
+  assert.strictEqual(result.activity.location, '大学生活动中心')
+  assert.strictEqual(result.activity.credit, 1.5)
+})
+
+test('明天 + 上午9点 + 默认 2 小时', function () {
+  const result = parser.parse('明天上午9点在操场举行《晨跑活动》，2学分', { now: NOW_DATE })
+  assert.strictEqual(result.ok, true)
+  assert.strictEqual(result.activity.title, '晨跑活动')
+  assert.strictEqual(result.activity.start, '2026-11-04 09:00')
+  assert.strictEqual(result.activity.end, '2026-11-04 11:00')
+  assert.strictEqual(result.activity.location, '操场')
+  assert.strictEqual(result.activity.credit, 2)
+  assert.ok(result.warnings.indexOf('未识别到结束时间，已默认 2 小时') >= 0)
+})
+
+test('下周三 + 晚上7点半', function () {
+  const result = parser.parse('下周三晚上7点半，在报告厅举办《摄影分享会》', { now: NOW_DATE })
+  assert.strictEqual(result.ok, true)
+  assert.strictEqual(result.activity.start, '2026-11-11 19:30')
+  assert.strictEqual(result.activity.end, '2026-11-11 21:30')
+  assert.strictEqual(result.activity.location, '报告厅')
+})
+
+test('缺时间时 ok=false，但保留已识别字段', function () {
+  const result = parser.parse('【讲座】人工智能\n地点：图书馆', { now: NOW_DATE })
+  assert.strictEqual(result.ok, false)
+  assert.strictEqual(result.activity.title, '人工智能')
+  assert.strictEqual(result.activity.location, '图书馆')
+  assert.strictEqual(result.activity.start, '')
+  assert.ok(result.warnings.indexOf('未识别到活动时间') >= 0)
+})
+
+test('跨天时间 23:00-01:00', function () {
+  const result = parser.parse('11月6日 23:00-01:00 在宿舍楼下集合，参加《夜间拉练》', { now: NOW_DATE })
+  assert.strictEqual(result.ok, true)
+  assert.strictEqual(result.activity.start, '2026-11-06 23:00')
+  assert.strictEqual(result.activity.end, '2026-11-07 01:00')
+  assert.ok(result.warnings.indexOf('结束时间早于开始时间，已按次日处理') >= 0)
+})
+
+test('空文本返回 ok=false', function () {
+  const result = parser.parse('   ', { now: NOW_DATE })
+  assert.strictEqual(result.ok, false)
+  assert.deepStrictEqual(result.warnings, ['通知内容为空'])
 })
 
 // ---------------------------------------------------------------------------

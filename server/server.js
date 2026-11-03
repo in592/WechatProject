@@ -12,7 +12,9 @@
 
 const http = require('http')
 const fs = require('fs')
+const crypto = require('crypto')
 const path = require('path')
+const parser = require('../miniprogram/utils/parser')
 
 const HOST = '127.0.0.1'
 const PORT = 3000
@@ -137,10 +139,49 @@ const server = http.createServer(function (req, res) {
         return
       }
 
-      sendJson(res, 501, {
-        ok: false,
-        error: '解析功能尚未实现',
-        gotText: typeof body.text === 'string'
+      const payload = body && typeof body === 'object' ? body : {}
+      const text = typeof payload.text === 'string' ? payload.text.trim() : ''
+
+      if (!text) {
+        sendJson(res, 400, { ok: false, error: 'text 不能为空' })
+        return
+      }
+
+      const source = payload.source === 'qq' ? 'qq' : 'web'
+      const parsed = parser.parse(text)
+
+      if (!parsed.ok) {
+        sendJson(res, 422, {
+          ok: false,
+          error: '解析失败，请检查通知内容',
+          warnings: parsed.warnings,
+          activity: parsed.activity
+        })
+        return
+      }
+
+      const data = readData()
+      if (!Array.isArray(data.activities)) data.activities = []
+
+      const activity = {
+        id: crypto.randomUUID(),
+        title: parsed.activity.title,
+        start: parsed.activity.start,
+        end: parsed.activity.end,
+        location: parsed.activity.location,
+        credit: parsed.activity.credit,
+        source: source,
+        rawText: text,
+        createdAt: new Date().toISOString()
+      }
+
+      data.activities.unshift(activity)
+      writeData(data)
+
+      sendJson(res, 201, {
+        ok: true,
+        activity: activity,
+        warnings: parsed.warnings
       })
     })
     return
