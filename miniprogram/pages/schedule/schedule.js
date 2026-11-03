@@ -93,6 +93,31 @@ function nextWeekday(character) {
   return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate())
 }
 
+function pickBestLine(lines) {
+  let bestIndex = 0
+  let bestScore = -1
+
+  lines.forEach(function (line, index) {
+    const text = compactText(line)
+    if (!text) return
+    if (/^第?\s*\d+\s*周/.test(text)) return
+    if (/^周[一二三四五六日天]$/.test(text)) return
+    if (/我的日程|课程表|节次/.test(text)) return
+
+    let score = 0
+    if (text.indexOf('@') >= 0) score += 3
+    if (/[\u4e00-\u9fa5]{2,}/.test(text)) score += 2
+    if (!/^\d+$/.test(text)) score += 1
+
+    if (score > bestScore) {
+      bestScore = score
+      bestIndex = index
+    }
+  })
+
+  return bestIndex
+}
+
 Page({
   data: {
     title: '',
@@ -311,7 +336,7 @@ Page({
         ocrModalVisible: true,
         ocrSelectedIndex: -1
       }, function () {
-        that.selectOcrLine(0)
+        that.selectOcrLine(pickBestLine(lines))
       })
     }).catch(function (err) {
       wx.showToast({ title: (err && err.message) || '识别失败', icon: 'none' })

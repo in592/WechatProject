@@ -112,17 +112,7 @@
         <text class="modal-title">识别结果</text>
         <text class="modal-close" bindtap="onOcrModalClose">×</text>
       </view>
-      <view class="modal-tip">点一条识别结果，修改课程名/地点/节次，确认后加入日程</view>
-
-      <scroll-view class="modal-lines" scroll-y>
-        <view
-          class="modal-line {{ocrSelectedIndex === index ? 'active' : ''}}"
-          wx:for="{{ocrLines}}"
-          wx:key="*this"
-          data-index="{{index}}"
-          bindtap="onOcrLineTap"
-        >{{item}}</view>
-      </scroll-view>
+      <view class="modal-tip">识别完成，请确认课程名、第几节和对应时间</view>
 
       <view class="modal-field">
         <text class="modal-label">课程名</text>
@@ -175,6 +165,10 @@
             <view class="modal-picker">{{endTime}}</view>
           </picker>
         </view>
+      </view>
+
+      <view class="modal-summary">
+        {{startPeriodIndex === endPeriodIndex ? periodLabels[startPeriodIndex] : periodLabels[startPeriodIndex] + ' 至 ' + periodLabels[endPeriodIndex]}} · {{startTime}} - {{endTime}}
       </view>
 
       <view class="modal-error" wx:if="{{error}}">{{error}}</view>
