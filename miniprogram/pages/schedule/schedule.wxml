@@ -1,9 +1,15 @@
 <view class="page">
   <view class="header">
     <view class="title">我的日程</view>
-    <view class="subtitle">加一条课表，报名时自动帮你避开冲突</view>
+    <view class="subtitle">课程日程和活动日程分开管理，报名时自动帮你避开冲突</view>
   </view>
 
+  <view class="seg">
+    <view class="seg-item {{activeTab === 'course' ? 'active' : ''}}" data-tab="course" bindtap="onTabTap">课程日程</view>
+    <view class="seg-item {{activeTab === 'activity' ? 'active' : ''}}" data-tab="activity" bindtap="onTabTap">活动日程</view>
+  </view>
+
+  <block wx:if="{{activeTab === 'course'}}">
   <view class="form-card">
     <view class="form-head">
       <text class="form-title">添加日程</text>
@@ -105,6 +111,39 @@
   </view>
 
   <view class="hint">添加后去活动详情点「报名」，冲突会被拦截并给出替代时段。</view>
+  </block>
+
+  <block wx:else>
+    <view class="list-head">
+      <text>已报名</text>
+      <text class="count">{{activityList.length}} 条</text>
+    </view>
+
+    <view class="empty" wx:if="{{activityList.length === 0}}">
+      <view class="empty-title">还没有报名活动</view>
+      <view class="empty-desc">去「活动」页点报名，成功后会出现在这里</view>
+    </view>
+
+    <view class="list" wx:else>
+      <view class="item" wx:for="{{activityList}}" wx:key="id">
+        <view class="date-badge">
+          <text class="date">{{item.dateText}}</text>
+          <text class="week">{{item.weekdayText}}</text>
+        </view>
+        <view class="item-body">
+          <view class="item-title">{{item.title}}</view>
+          <view class="item-time">{{item.timeText}}<text wx:if="{{item.location}}"> · {{item.location}}</text></view>
+          <view class="item-meta">
+            <text class="tag {{item.typeClass}}">{{item.typeText}}</text>
+            <text class="credit">{{item.creditText}}</text>
+          </view>
+        </view>
+        <button class="delete" data-id="{{item.id}}" bindtap="onCancelSignup">取消</button>
+      </view>
+    </view>
+
+    <view class="hint">报名成功的活动会自动进入这里，并参与冲突检测。</view>
+  </block>
 
   <view class="modal-mask" wx:if="{{ocrModalVisible}}" catchtap="onOcrModalClose">
     <scroll-view class="ocr-modal" scroll-y catchtap="noop">

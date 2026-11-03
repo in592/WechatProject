@@ -22,6 +22,29 @@
   font-size: 24rpx;
 }
 
+.seg {
+  display: flex;
+  margin-top: 20rpx;
+  padding: 6rpx;
+  border-radius: 999rpx;
+  background: #FFE4F1;
+}
+
+.seg-item {
+  flex: 1;
+  padding: 14rpx 0;
+  border-radius: 999rpx;
+  color: #65020A;
+  font-size: 24rpx;
+  text-align: center;
+}
+
+.seg-item.active {
+  background: #65020A;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
 .form-card {
   margin-top: 24rpx;
   padding: 28rpx;
@@ -257,6 +280,47 @@
   margin-top: 6rpx;
   color: #5A6069;
   font-size: 24rpx;
+}
+
+.item-meta {
+  display: flex;
+  align-items: center;
+  margin-top: 10rpx;
+}
+
+.tag {
+  display: inline-block;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  background: #F0EDEA;
+  color: #5A6069;
+  font-size: 20rpx;
+}
+
+.tag.academic {
+  background: #EEF0FF;
+  color: #4F5BD5;
+}
+
+.tag.volunteer {
+  background: #E6FBF5;
+  color: #0B6B57;
+}
+
+.tag.sports {
+  background: #FFF0E6;
+  color: #B85516;
+}
+
+.tag.skill {
+  background: #F0EAFF;
+  color: #6B3FD4;
+}
+
+.credit {
+  margin-left: 12rpx;
+  color: #8A9099;
+  font-size: 20rpx;
 }
 
 .delete {

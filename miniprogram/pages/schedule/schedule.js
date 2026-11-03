@@ -1,4 +1,5 @@
 const storage = require('../../utils/storage')
+const signup = require('../../utils/signup')
 const conflict = require('../../utils/conflict')
 const request = require('../../utils/request')
 
@@ -78,6 +79,14 @@ function compactText(value) {
     .replace(/(\d)\s+(?=[\u4e00-\u9fa5])/g, '$1')
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+function typeClass(type) {
+  if (type === '学术科技') return 'academic'
+  if (type === '志愿公益') return 'volunteer'
+  if (type === '文体活动') return 'sports'
+  if (type === '技能特长') return 'skill'
+  return 'other'
 }
 
 const WEEKDAY_INDEX = { 一: 0, 二: 1, 三: 2, 四: 3, 五: 4, 六: 5, 日: 6, 天: 6 }
@@ -212,6 +221,8 @@ Page({
     endPeriodIndex: 1,
     changeBreak: false,
     list: [],
+    activityList: [],
+    activeTab: 'course',
     error: '',
     ocrLoading: false,
     ocrModalVisible: false,
@@ -243,7 +254,23 @@ Page({
       }
     })
 
-    this.setData({ list: list })
+    const activities = signup.getSignups().slice().sort(function (a, b) {
+      return conflict.toTimestamp(a.start) - conflict.toTimestamp(b.start)
+    }).map(function (item) {
+      return {
+        id: String(item.id || ''),
+        title: item.title || '未命名活动',
+        location: item.location || '',
+        dateText: dateText(item.start),
+        weekdayText: weekdayName(item.start),
+        timeText: timeText(item.start, item.end),
+        typeText: item.type || '其他',
+        typeClass: typeClass(item.type),
+        creditText: item.credit === null || item.credit === undefined ? '未标注' : item.credit + ' 学分'
+      }
+    })
+
+    this.setData({ list: list, activityList: activities })
   },
 
   onTitleInput: function (event) {
@@ -264,6 +291,32 @@ Page({
 
   onEndTimeChange: function (event) {
     this.setData({ endTime: event.detail.value, error: '' })
+  },
+
+  onTabTap: function (event) {
+    this.setData({ activeTab: event.currentTarget.dataset.tab })
+  },
+
+  onCancelSignup: function (event) {
+    const id = String(event.currentTarget.dataset.id || '')
+    if (!id) return
+
+    const item = this.data.activityList.find(function (entry) {
+      return entry.id === id
+    })
+    const that = this
+
+    wx.showModal({
+      title: '取消报名',
+      content: '确定取消「' + (item ? item.title : '这个活动') + '」的报名？',
+      success: function (res) {
+        if (!res.confirm) return
+
+        signup.removeSignup(id)
+        that.loadList()
+        wx.showToast({ title: '已取消', icon: 'success' })
+      }
+    })
   },
 
   onStartPeriodChange: function (event) {

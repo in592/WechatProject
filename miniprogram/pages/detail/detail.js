@@ -1,6 +1,6 @@
 const request = require('../../utils/request')
-const storage = require('../../utils/storage')
 const signup = require('../../utils/signup')
+const agenda = require('../../utils/agenda')
 const conflict = require('../../utils/conflict')
 
 function typeClass(type) {
@@ -92,7 +92,9 @@ Page({
     this.setData({ signing: true })
 
     try {
-      const schedule = storage.getSchedule()
+      const schedule = agenda.getAgenda().filter(function (item) {
+        return String(item.id) !== String(activity.id)
+      })
       const conflicts = conflict.findConflicts(activity, schedule)
 
       if (conflicts.length > 0) {
