@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>校园管家 · 最终配色 Direction D</title>
+<style>
+  :root {
+    --berry: #65020A;
+    --pink: #FF7EC1;
+    --pink-soft: #FFE4F1;
+    --mint: #8AEED1;
+    --mint-soft: #E6FBF5;
+    --paper: #FFF8F6;
+    --ink: #1F2329;
+    --ink-600: #5A6069;
+    --ink-400: #8A9099;
+    --line: #F0DDE5;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 48px 32px 80px;
+    background: #F3EFE7;
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+
+  .wrap { max-width: 1080px; margin: 0 auto; }
+
+  .eyebrow {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--pink-soft);
+    color: var(--berry);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  h1 { margin: 16px 0 10px; font-size: 36px; letter-spacing: 1px; }
+  header p { margin: 0; color: var(--ink-600); font-size: 14px; line-height: 1.8; }
+
+  h2 { margin: 44px 0 16px; font-size: 20px; }
+
+  .colors {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 28px;
+  }
+
+  .color {
+    height: 150px;
+    padding: 18px;
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: .5px;
+  }
+
+  .color span {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0;
+    opacity: .82;
+  }
+
+  .berry { background: var(--berry); color: #fff; }
+  .pink { background: var(--pink); color: var(--berry); }
+  .mint { background: var(--mint); color: var(--berry); }
+
+  .rules {
+    margin-top: 16px;
+    padding: 20px 24px;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(31, 35, 41, .05);
+  }
+
+  .rules ul { margin: 0; padding-left: 18px; color: var(--ink-600); font-size: 13px; line-height: 2; }
+  .rules b { color: var(--berry); }
+
+  .screens { display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-start; }
+
+  .phone {
+    width: 300px;
+    height: 620px;
+    border-radius: 38px;
+    background: #fff;
+    box-shadow: 0 18px 46px rgba(31, 35, 41, .14);
+    overflow: hidden;
+    position: relative;
+    flex: none;
+  }
+
+  .screen { height: 100%; background: var(--paper); overflow: hidden; font-size: 12px; }
+
+  .login .hero {
+    padding: 52px 26px 30px;
+    background: var(--pink-soft);
+    text-align: center;
+  }
+
+  .logo {
+    width: 62px;
+    height: 62px;
+    margin: 0 auto 14px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--pink), var(--berry));
+    color: #fff;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 62px;
+  }
+
+  .login h3 { margin: 0; color: var(--berry); font-size: 24px; letter-spacing: 1px; }
+  .login .slogan { margin-top: 8px; color: var(--ink-600); font-size: 11px; }
+
+  .login .form { margin: 20px 18px; padding: 18px; border-radius: 18px; background: #fff; }
+
+  .label { margin: 12px 0 6px; color: var(--ink-600); font-size: 11px; }
+  .label:first-child { margin-top: 0; }
+
+  .input {
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 12px;
+    background: #FFF8F6;
+    color: var(--ink);
+    line-height: 40px;
+  }
+
+  .btn {
+    width: 100%;
+    height: 42px;
+    margin-top: 18px;
+    border: 0;
+    border-radius: 21px;
+    background: var(--berry);
+    color: #fff;
+    font-size: 13px;
+    font-family: inherit;
+  }
+
+  .tip { margin-top: 12px; text-align: center; color: var(--ink-400); font-size: 10px; }
+
+  .index { padding: 26px 16px; }
+  .hello { color: var(--berry); font-size: 22px; font-weight: 600; }
+  .hello-sub { margin-top: 4px; color: var(--ink-400); font-size: 11px; }
+
+  .search {
+    height: 38px;
+    margin-top: 14px;
+    padding: 0 14px;
+    border-radius: 19px;
+    background: #fff;
+    color: var(--ink-400);
+    font-size: 11px;
+    line-height: 38px;
+    box-shadow: 0 4px 14px rgba(31, 35, 41, .05);
+  }
+
+  .tabs { display: flex; gap: 6px; margin-top: 14px; overflow: hidden; }
+
+  .tab {
+    padding: 7px 11px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--ink-600);
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .tab.active { border-color: var(--berry); background: var(--berry); color: #fff; }
+
+  .act-card {
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(31, 35, 41, .05);
+    border-left: 5px solid var(--berry);
+  }
+
+  .act-card.pink-card { border-left-color: var(--pink); }
+  .act-title { font-size: 13px; font-weight: 600; }
+  .act-meta { margin-top: 6px; color: var(--ink-600); font-size: 10px; }
+
+  .tag {
+    display: inline-block;
+    margin-top: 9px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--pink-soft);
+    color: var(--berry);
+    font-size: 9px;
+  }
+
+  .tag.mint { background: var(--mint-soft); color: #0B6B57; }
+
+  .detail .hero { padding: 36px 22px 24px; background: var(--pink-soft); }
+  .detail .tag { margin: 0; }
+  .detail h3 { margin: 12px 0 0; color: var(--berry); font-size: 22px; line-height: 1.35; }
+  .detail .when { margin-top: 8px; color: var(--berry); font-size: 11px; font-weight: 600; }
+  .detail .body { padding: 18px 20px; }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 11px;
+  }
+
+  .row span { color: var(--ink-400); }
+  .row b { font-weight: 600; }
+
+  .modal-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    background: rgba(31, 35, 41, .32);
+  }
+
+  .modal { width: 100%; padding: 18px 18px 22px; border-radius: 22px 22px 0 0; background: #fff; }
+
+  .modal-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--berry);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .modal-head::before {
+    content: "!";
+    display: grid;
+    width: 20px;
+    height: 20px;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--pink-soft);
+    font-size: 12px;
+  }
+
+  .modal-body { margin-top: 10px; color: var(--ink-600); font-size: 11px; line-height: 1.7; }
+  .modal-body b { color: var(--ink); }
+
+  .slot {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--mint-soft);
+    color: #0B6B57;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+  .modal-actions button { flex: 1; height: 38px; border: 0; border-radius: 19px; background: var(--berry); color: #fff; font-family: inherit; font-size: 12px; }
+  .modal-actions .ghost { background: #F5F3EE; color: var(--ink-600); }
+
+  footer { margin-top: 44px; color: var(--ink-400); font-size: 12px; line-height: 1.8; }
+
+  @media (max-width: 900px) {
+    .colors { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">FINAL DIRECTION D</div>
+    <h1>樱粉 × 薄荷青 × 浆果红</h1>
+    <p>暖白打底，樱粉和薄荷青做面，浆果红做文字和主按钮。冲突弹窗用浅粉底 + 浆果红标题 + 薄荷青推荐时段。</p>
+  </header>
+
+  <section class="colors">
+    <div class="color berry">#65020A<span>浆果红 · 文字 / 主按钮（白字）</span></div>
+    <div class="color pink">#FF7EC1<span>樱粉 · hero / 品牌面（配深色字）</span></div>
+    <div class="color mint">#8AEED1<span>薄荷青 · 成功 / 空闲 / 推荐（配深色字）</span></div>
+  </section>
+
+  <section class="rules">
+    <h2>使用规则</h2>
+    <ul>
+      <li><b>70%</b> 暖白 #FFF8F6 + 白卡片；<b>20%</b> 樱粉 / 薄荷青面；<b>10%</b> 浆果红文字与按钮。</li>
+      <li>樱粉、薄荷青上 <strong>不要放白字</strong>，用 #65020A 或 #1F2329。</li>
+      <li>冲突不能只靠颜色，必须有「冲突」文字或图标。</li>
+      <li>类型标签可以借信息蓝 #4F5BD5、柿橙 #B85516，但只做小面积。</li>
+    </ul>
+  </section>
+
+  <h2>关键页面示意</h2>
+  <div class="screens">
+    <div class="phone">
+      <div class="screen login">
+        <div class="hero">
+          <div class="logo">校</div>
+          <h3>校园管家</h3>
+          <div class="slogan">把社团通知变成能报名的活动</div>
+        </div>
+        <div class="form">
+          <div class="label">学号</div>
+          <div class="input">20230001</div>
+          <div class="label">姓名</div>
+          <div class="input">张三</div>
+          <button class="btn">进入校园管家</button>
+          <div class="tip">登录信息只保存在本机</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="screen index">
+        <div class="hello">你好，张三</div>
+        <div class="hello-sub">今天想去哪场活动？</div>
+        <div class="search">搜索活动标题 / 地点</div>
+        <div class="tabs">
+          <span class="tab active">全部</span>
+          <span class="tab">学术科技</span>
+          <span class="tab">志愿公益</span>
+          <span class="tab">文体活动</span>
+        </div>
+        <div class="act-card">
+          <div class="act-title">人工智能前沿讲座</div>
+          <div class="act-meta">11-06 15:00 - 17:00</div>
+          <div class="act-meta">图书馆三楼报告厅</div>
+          <span class="tag">学术科技</span>
+        </div>
+        <div class="act-card pink-card">
+          <div class="act-title">摄影分享会</div>
+          <div class="act-meta">11-11 19:30 - 21:30</div>
+          <div class="act-meta">报告厅</div>
+          <span class="tag mint">技能特长</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="screen detail">
+        <div class="hero">
+          <span class="tag">学术科技</span>
+          <h3>人工智能前沿讲座</h3>
+          <div class="when">2026-11-06 15:00 - 17:00</div>
+        </div>
+        <div class="body">
+          <div class="row"><span>地点</span><b>图书馆三楼报告厅</b></div>
+          <div class="row"><span>学分</span><b>0.5 学分</b></div>
+          <div class="row"><span>主办</span><b>计算机学院</b></div>
+          <button class="btn">报名</button>
+        </div>
+        <div class="modal-wrap">
+          <div class="modal">
+            <div class="modal-head">时间冲突</div>
+            <div class="modal-body">与 <b>「高数补习」</b> 冲突<br>周五 15:00 - 17:00</div>
+            <div class="slot">推荐：周四 19:00 你有空</div>
+            <div class="modal-actions">
+              <button class="ghost">取消</button>
+              <button>去看空闲时段</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    这是最终配色的视觉稿，未改任何页面代码。<br>
+    落地：P6 详情页先按此实现，登录/首页在 P8 统一换成这套。
+  </footer>
+</div>
+</body>
+</html>
