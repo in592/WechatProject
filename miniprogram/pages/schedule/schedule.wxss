@@ -100,6 +100,28 @@
   font-size: 24rpx;
 }
 
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4rpx 0 20rpx;
+}
+
+.switch-label {
+  flex: 1;
+  padding-right: 16rpx;
+  color: #5A6069;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.period-hint {
+  margin: -8rpx 0 20rpx;
+  color: #8A9099;
+  font-size: 22rpx;
+  line-height: 1.5;
+}
+
 .ocr-card {
   margin-top: 20rpx;
   padding: 24rpx;

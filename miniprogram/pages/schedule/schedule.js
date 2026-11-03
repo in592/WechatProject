@@ -4,8 +4,45 @@ const request = require('../../utils/request')
 
 const WEEKDAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
 
+const PERIOD_STARTS = [
+  '08:10', '09:00', '09:50', '10:40', '11:30',
+  '14:00', '14:50', '15:40', '16:30', '17:20', '18:10'
+]
+
 function pad2(number) {
   return number < 10 ? '0' + number : String(number)
+}
+
+function toMinutes(text) {
+  const parts = String(text).split(':')
+  return Number(parts[0]) * 60 + Number(parts[1])
+}
+
+function fromMinutes(total) {
+  return pad2(Math.floor(total / 60)) + ':' + pad2(total % 60)
+}
+
+function addMinutes(text, minutes) {
+  return fromMinutes(toMinutes(text) + minutes)
+}
+
+function periodTimes(startIndex, endIndex, changeBreak) {
+  const startPeriod = Math.max(1, Math.min(11, Number(startIndex) + 1))
+  const endPeriod = Math.max(startPeriod, Math.min(11, Number(endIndex) + 1))
+
+  let start = toMinutes(PERIOD_STARTS[startPeriod - 1])
+  let end = toMinutes(PERIOD_STARTS[endPeriod - 1]) + 40
+
+  // 第 6 节固定 14:00；其他节次如果前一节是不同课程，课间从 10 分钟变 15 分钟
+  if (changeBreak && startPeriod > 1 && startPeriod !== 6) {
+    start += 5
+    end += 5
+  }
+
+  return {
+    start: fromMinutes(start),
+    end: fromMinutes(end)
+  }
 }
 
 function todayText() {
@@ -61,12 +98,20 @@ Page({
     title: '',
     location: '',
     date: todayText(),
-    startTime: '08:00',
-    endTime: '10:00',
+    startTime: '08:10',
+    endTime: '09:40',
+    periodLabels: ['第1节', '第2节', '第3节', '第4节', '第5节', '第6节', '第7节', '第8节', '第9节', '第10节', '第11节'],
+    startPeriodIndex: 0,
+    endPeriodIndex: 1,
+    changeBreak: false,
     list: [],
     error: '',
     ocrLines: [],
     ocrLoading: false
+  },
+
+  onLoad: function () {
+    this.updatePeriodTimes()
   },
 
   onShow: function () {
@@ -110,6 +155,50 @@ Page({
 
   onEndTimeChange: function (event) {
     this.setData({ endTime: event.detail.value, error: '' })
+  },
+
+  onStartPeriodChange: function (event) {
+    const that = this
+    const start = Number(event.detail.value)
+    const end = Math.max(start, this.data.endPeriodIndex)
+
+    this.setData({
+      startPeriodIndex: start,
+      endPeriodIndex: end,
+      error: ''
+    }, function () {
+      that.updatePeriodTimes()
+    })
+  },
+
+  onEndPeriodChange: function (event) {
+    const that = this
+    const end = Number(event.detail.value)
+    const start = Math.min(this.data.startPeriodIndex, end)
+
+    this.setData({
+      startPeriodIndex: start,
+      endPeriodIndex: end,
+      error: ''
+    }, function () {
+      that.updatePeriodTimes()
+    })
+  },
+
+  onChangeBreakChange: function (event) {
+    const that = this
+    this.setData({ changeBreak: event.detail.value }, function () {
+      that.updatePeriodTimes()
+    })
+  },
+
+  updatePeriodTimes: function () {
+    const times = periodTimes(
+      this.data.startPeriodIndex,
+      this.data.endPeriodIndex,
+      this.data.changeBreak
+    )
+    this.setData({ startTime: times.start, endTime: times.end })
   },
 
   onOcrTap: function () {

@@ -41,6 +41,26 @@
 
     <view class="time-row">
       <view class="field half">
+        <text class="label">开始节次</text>
+        <picker mode="selector" range="{{periodLabels}}" value="{{startPeriodIndex}}" bindchange="onStartPeriodChange">
+          <view class="picker">{{periodLabels[startPeriodIndex]}}</view>
+        </picker>
+      </view>
+      <view class="field half">
+        <text class="label">结束节次</text>
+        <picker mode="selector" range="{{periodLabels}}" value="{{endPeriodIndex}}" bindchange="onEndPeriodChange">
+          <view class="picker">{{periodLabels[endPeriodIndex]}}</view>
+        </picker>
+      </view>
+    </view>
+
+    <view class="switch-row">
+      <text class="switch-label">前一节是不同课程（课间 15 分钟）</text>
+      <switch checked="{{changeBreak}}" color="#65020A" bindchange="onChangeBreakChange" />
+    </view>
+
+    <view class="time-row">
+      <view class="field half">
         <text class="label">开始</text>
         <picker mode="time" value="{{startTime}}" bindchange="onStartTimeChange">
           <view class="picker">{{startTime}}</view>
@@ -53,6 +73,8 @@
         </picker>
       </view>
     </view>
+
+    <view class="period-hint">第1节 08:10；每节 40 分钟；普通课间 10 分钟；第6节 14:00</view>
 
     <view class="error" wx:if="{{error}}">{{error}}</view>
     <button class="add" bindtap="onAdd">添加日程</button>
