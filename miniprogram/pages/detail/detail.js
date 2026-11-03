@@ -33,6 +33,7 @@ Page({
     loading: true,
     error: '',
     signing: false,
+    signed: false,
     typeText: '',
     typeClass: '',
     startText: '',
@@ -68,6 +69,7 @@ Page({
           activity: data.activity,
           loading: false,
           error: '',
+          signed: signup.isSignedUp(data.activity.id),
           typeText: view.typeText,
           typeClass: view.typeClass,
           startText: view.startText,
@@ -83,6 +85,12 @@ Page({
 
   onRetry: function () {
     return this.loadActivity()
+  },
+
+  onShow: function () {
+    if (this.data.activity) {
+      this.setData({ signed: signup.isSignedUp(this.data.activity.id) })
+    }
   },
 
   onSignup: function () {
@@ -129,6 +137,7 @@ Page({
       } else {
         const already = signup.isSignedUp(activity.id)
         signup.saveSignup(activity)
+        this.setData({ signed: true })
 
         wx.showModal({
           title: already ? '已报名' : '报名成功',
@@ -140,5 +149,24 @@ Page({
     } finally {
       this.setData({ signing: false })
     }
+  },
+
+  onCancelSignup: function () {
+    const activity = this.data.activity
+    if (!activity || this.data.signing) return
+
+    const that = this
+
+    wx.showModal({
+      title: '取消报名',
+      content: '确定取消「' + (activity.title || '活动') + '」的报名？',
+      success: function (res) {
+        if (!res.confirm) return
+
+        signup.removeSignup(activity.id)
+        that.setData({ signed: false })
+        wx.showToast({ title: '已取消报名', icon: 'success' })
+      }
+    })
   }
 })

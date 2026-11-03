@@ -46,7 +46,11 @@
     </view>
 
     <view class="action-bar">
-      <button class="signup" bindtap="onSignup" loading="{{signing}}">报名</button>
+      <view class="action-row" wx:if="{{signed}}">
+        <view class="signed">已报名</view>
+        <button class="cancel" bindtap="onCancelSignup">取消报名</button>
+      </view>
+      <button wx:else class="signup" bindtap="onSignup" loading="{{signing}}">报名</button>
     </view>
   </block>
 </view>

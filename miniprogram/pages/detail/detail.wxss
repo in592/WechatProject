@@ -138,6 +138,40 @@
   border: none;
 }
 
+.action-row {
+  display: flex;
+  align-items: center;
+}
+
+.signed {
+  flex: 1;
+  height: 88rpx;
+  border-radius: 44rpx;
+  background: #FFE4F1;
+  color: #65020A;
+  font-size: 28rpx;
+  font-weight: 600;
+  line-height: 88rpx;
+  text-align: center;
+}
+
+.cancel {
+  flex: 1;
+  height: 88rpx;
+  margin: 0 0 0 20rpx;
+  padding: 0;
+  border: 2rpx solid #65020A;
+  border-radius: 44rpx;
+  background: transparent;
+  color: #65020A;
+  font-size: 28rpx;
+  line-height: 84rpx;
+}
+
+.cancel::after {
+  border: none;
+}
+
 .state {
   padding: 160rpx 48rpx;
   color: #8A9099;
