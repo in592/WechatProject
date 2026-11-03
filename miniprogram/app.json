@@ -3,7 +3,8 @@
     "pages/login/login",
     "pages/index/index",
     "pages/detail/detail",
-    "pages/schedule/schedule"
+    "pages/schedule/schedule",
+    "pages/profile/profile"
   ],
   "window": {
     "navigationBarTitleText": "校园管家",
@@ -29,6 +30,12 @@
         "text": "日程",
         "iconPath": "images/tab-schedule.png",
         "selectedIconPath": "images/tab-schedule-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "images/tab-profile.png",
+        "selectedIconPath": "images/tab-profile-active.png"
       }
     ]
   },

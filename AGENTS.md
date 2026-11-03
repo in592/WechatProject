@@ -22,11 +22,14 @@
 | 5 | **报名冲突拦截** + **替代时段推荐** | 小程序 |
 | 6 | 管理端：导入、**编辑**、**删除** | 网页后台 |
 | 7 | 学号 + 姓名登录（本地态） | 小程序 |
+| 8 | **我的**：已报名活动 + 按类型的学分饼图（本地态） | 小程序 |
+
+> 学分饼图只统计「已报名」的活动，数据保存在本机，不做云端汇总。
 
 ### 明确不做（不要加回来）
 
 - ❌ **列表上的红黄绿冲突徽章**（冲突只在点报名时算）
-- ❌ **学分统计/汇总**
+- ❌ 云端报名记录 / 跨设备学分同步（本期只做本机）
 - ❌ 云端部署、数据库、第三方 UI 库
 
 > 冲突计算只发生在“点报名”这一处。列表页**不**计算状态，不要自作主张加回徽章。
@@ -57,7 +60,7 @@ QQ 机器人**本期不实现**，但入口要留好，将来接入只需加一�
 
 - 小程序：微信原生（WXML/WXSS/JS），**无 npm、无 TS、无构建**
 - 后端：Node 原生 `http` 模块，**零依赖**，不需要 `npm install`
-- 数据：`server/data.json`（后端）+ `wx.setStorageSync`（日程、登录态）
+- 数据：`server/data.json`（后端）+ `wx.setStorageSync`（日程、登录态、报名记录）
 - 降级：后端挂了，小程序退回本地数据，不白屏
 
 ## 4 目录
@@ -78,10 +81,12 @@ ea-hackathon/
     pages/index/         列表 + 搜索 + 类型筛选
     pages/detail/        详情 + 报名
     pages/schedule/      我的日程
+    pages/profile/       我的：已报名 + 学分饼图
     utils/request.js     HTTP 封装（唯一出口）
     utils/conflict.js    重叠判定 + 替代时段
     utils/parser.js      通知解析
-    utils/storage.js     本地存储
+    utils/storage.js     本地存储（日程）
+    utils/signup.js      报名记录（本地）
     utils/auth.js        登录态
   tools/check-miniprogram.js   静态检查
 ```

@@ -1,5 +1,6 @@
 const request = require('../../utils/request')
 const storage = require('../../utils/storage')
+const signup = require('../../utils/signup')
 const conflict = require('../../utils/conflict')
 
 function typeClass(type) {
@@ -124,9 +125,12 @@ Page({
           confirmText: '知道了'
         })
       } else {
+        const already = signup.isSignedUp(activity.id)
+        signup.saveSignup(activity)
+
         wx.showModal({
-          title: '报名成功',
-          content: '已报名「' + (activity.title || '活动') + '」',
+          title: already ? '已报名' : '报名成功',
+          content: already ? '你已经报过「' + (activity.title || '活动') + '」' : '已报名「' + (activity.title || '活动') + '」',
           showCancel: false,
           confirmText: '好的'
         })

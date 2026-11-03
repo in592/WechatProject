@@ -1,0 +1,268 @@
+.page {
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 32rpx 32rpx 48rpx;
+  background: #FFF8F6;
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  padding: 32rpx;
+  border-radius: 28rpx;
+  background: #FFE4F1;
+}
+
+.avatar {
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF7EC1, #65020A);
+  color: #FFFFFF;
+  font-size: 44rpx;
+  font-weight: 600;
+  line-height: 104rpx;
+  text-align: center;
+}
+
+.profile-info {
+  margin-left: 24rpx;
+}
+
+.name {
+  color: #65020A;
+  font-size: 40rpx;
+  font-weight: 600;
+}
+
+.sid {
+  margin-top: 6rpx;
+  color: #5A6069;
+  font-size: 24rpx;
+}
+
+.stats {
+  display: flex;
+  margin-top: 20rpx;
+}
+
+.stat {
+  flex: 1;
+  padding: 24rpx;
+  border-radius: 22rpx;
+  background: #FFFFFF;
+  box-shadow: 0 6rpx 18rpx rgba(101, 2, 10, 0.05);
+  text-align: center;
+}
+
+.stat + .stat {
+  margin-left: 16rpx;
+}
+
+.stat-value {
+  display: block;
+  color: #65020A;
+  font-size: 44rpx;
+  font-weight: 600;
+}
+
+.stat-label {
+  display: block;
+  margin-top: 4rpx;
+  color: #8A9099;
+  font-size: 22rpx;
+}
+
+.card {
+  margin-top: 20rpx;
+  padding: 28rpx;
+  border-radius: 24rpx;
+  background: #FFFFFF;
+  box-shadow: 0 8rpx 24rpx rgba(31, 35, 41, 0.05);
+}
+
+.card-title {
+  color: #65020A;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 340rpx;
+  margin-top: 12rpx;
+}
+
+.chart {
+  display: block;
+  width: 100%;
+  height: 340rpx;
+}
+
+.chart-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.chart-total {
+  display: block;
+  color: #65020A;
+  font-size: 40rpx;
+  font-weight: 600;
+}
+
+.chart-label {
+  display: block;
+  margin-top: 2rpx;
+  color: #8A9099;
+  font-size: 20rpx;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 8rpx;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  width: 50%;
+  margin-top: 12rpx;
+  font-size: 24rpx;
+}
+
+.dot {
+  width: 16rpx;
+  height: 16rpx;
+  margin-right: 10rpx;
+  border-radius: 50%;
+}
+
+.legend-name {
+  color: #5A6069;
+}
+
+.legend-value {
+  margin-left: 8rpx;
+  color: #65020A;
+  font-weight: 600;
+}
+
+.empty-chart {
+  padding: 40rpx 28rpx;
+  text-align: center;
+}
+
+.empty-title {
+  color: #65020A;
+  font-size: 30rpx;
+  font-weight: 500;
+}
+
+.empty-desc {
+  margin-top: 10rpx;
+  color: #8A9099;
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+
+.list-head {
+  display: flex;
+  justify-content: space-between;
+  margin: 32rpx 4rpx 16rpx;
+  color: #5A6069;
+  font-size: 24rpx;
+}
+
+.count {
+  color: #8A9099;
+}
+
+.empty {
+  padding: 48rpx 32rpx;
+  border-radius: 24rpx;
+  background: #E6FBF5;
+  text-align: center;
+}
+
+.signup-card {
+  margin-bottom: 16rpx;
+  padding: 24rpx;
+  border-radius: 22rpx;
+  background: #FFFFFF;
+  box-shadow: 0 6rpx 18rpx rgba(31, 35, 41, 0.05);
+}
+
+.signup-title {
+  color: #1F2329;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.signup-meta {
+  margin-top: 6rpx;
+  color: #5A6069;
+  font-size: 24rpx;
+}
+
+.signup-foot {
+  display: flex;
+  align-items: center;
+  margin-top: 14rpx;
+}
+
+.tag {
+  display: inline-block;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  background: #F0EDEA;
+  color: #5A6069;
+  font-size: 20rpx;
+}
+
+.tag.academic {
+  background: #EEF0FF;
+  color: #4F5BD5;
+}
+
+.tag.volunteer {
+  background: #E6FBF5;
+  color: #0B6B57;
+}
+
+.tag.sports {
+  background: #FFF0E6;
+  color: #B85516;
+}
+
+.tag.skill {
+  background: #F0EAFF;
+  color: #6B3FD4;
+}
+
+.signup-credit {
+  margin-left: 16rpx;
+  color: #8A9099;
+  font-size: 22rpx;
+}
+
+.logout {
+  width: 100%;
+  height: 84rpx;
+  margin-top: 32rpx;
+  border: 1rpx solid #F0DDE5;
+  border-radius: 42rpx;
+  background: #FFFFFF;
+  color: #65020A;
+  font-size: 28rpx;
+  line-height: 84rpx;
+}
+
+.logout::after {
+  border: none;
+}
