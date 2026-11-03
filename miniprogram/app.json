@@ -12,6 +12,26 @@
     "backgroundColor": "#f5f6f8",
     "backgroundTextStyle": "dark"
   },
+  "tabBar": {
+    "color": "#8A9099",
+    "selectedColor": "#65020A",
+    "backgroundColor": "#FFF8F6",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "活动",
+        "iconPath": "images/tab-activity.png",
+        "selectedIconPath": "images/tab-activity-active.png"
+      },
+      {
+        "pagePath": "pages/schedule/schedule",
+        "text": "日程",
+        "iconPath": "images/tab-schedule.png",
+        "selectedIconPath": "images/tab-schedule-active.png"
+      }
+    ]
+  },
   "style": "v2",
   "sitemapLocation": "sitemap.json",
   "lazyCodeLoading": "requiredComponents"

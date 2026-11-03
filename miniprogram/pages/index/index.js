@@ -147,10 +147,6 @@ Page({
     wx.navigateTo({ url: '/pages/detail/detail?id=' + encodeURIComponent(id) })
   },
 
-  onScheduleTap: function () {
-    wx.navigateTo({ url: '/pages/schedule/schedule' })
-  },
-
   onRetry: function () {
     return this.loadActivities()
   }
