@@ -80,42 +80,124 @@ function compactText(value) {
     .trim()
 }
 
-function nextWeekday(character) {
-  const map = { 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 日: 0, 天: 0 }
-  const target = map[character]
+const WEEKDAY_INDEX = { 一: 0, 二: 1, 三: 2, 四: 3, 五: 4, 六: 5, 日: 6, 天: 6 }
 
-  if (target === undefined) return todayText()
-
-  const today = new Date()
-  const delta = (target - today.getDay() + 7) % 7
-  const date = new Date(today)
-  date.setDate(date.getDate() + delta)
+function formatDate(date) {
   return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate())
 }
 
-function pickBestLine(lines) {
-  let bestIndex = 0
-  let bestScore = -1
+function mondayText() {
+  const today = new Date()
+  const day = today.getDay() === 0 ? 7 : today.getDay()
+  const monday = new Date(today)
+  monday.setDate(today.getDate() - (day - 1))
+  return formatDate(monday)
+}
 
-  lines.forEach(function (line, index) {
+function addDaysText(dateText, days) {
+  const parts = String(dateText).split('-')
+  const date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]))
+  if (isNaN(date.getTime())) return dateText
+  date.setDate(date.getDate() + days)
+  return formatDate(date)
+}
+
+function buildDate(year, month, day) {
+  const date = new Date(year, month - 1, day)
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    return null
+  }
+  return date
+}
+
+function explicitDate(text) {
+  let match = text.match(/(\d{4})\s*[-/年]\s*(\d{1,2})\s*[-/月]\s*(\d{1,2})\s*[日号]?/)
+  if (match) {
+    const date = buildDate(Number(match[1]), Number(match[2]), Number(match[3]))
+    if (date) return formatDate(date)
+  }
+
+  match = text.match(/(\d{1,2})\s*月\s*(\d{1,2})\s*[日号]/)
+  if (match) {
+    const date = buildDate(new Date().getFullYear(), Number(match[1]), Number(match[2]))
+    if (date) return formatDate(date)
+  }
+
+  return ''
+}
+
+function isNoiseLine(text) {
+  if (!text || text.length < 2) return true
+  if (/^第?\s*\d+\s*周/.test(text)) return true
+  if (/我的日程|课程表|节次/.test(text)) return true
+  if (/^周[一二三四五六日天]$/.test(text)) return true
+  if (/^星期[一二三四五六日天]$/.test(text)) return true
+  if (/^\d+$/.test(text)) return true
+  if (/^[a-z0-9.:/_-]+$/i.test(text)) return true
+  if (/^[\d\s:：.,，。;；\-—/]+$/.test(text)) return true
+  return false
+}
+
+function buildDrafts(lines, weekStart) {
+  const drafts = []
+
+  lines.forEach(function (line) {
     const text = compactText(line)
-    if (!text) return
-    if (/^第?\s*\d+\s*周/.test(text)) return
-    if (/^周[一二三四五六日天]$/.test(text)) return
-    if (/我的日程|课程表|节次/.test(text)) return
+    if (isNoiseLine(text)) return
 
-    let score = 0
-    if (text.indexOf('@') >= 0) score += 3
-    if (/[\u4e00-\u9fa5]{2,}/.test(text)) score += 2
-    if (!/^\d+$/.test(text)) score += 1
-
-    if (score > bestScore) {
-      bestScore = score
-      bestIndex = index
+    let title = text
+    let location = ''
+    const at = text.indexOf('@')
+    if (at >= 0) {
+      title = text.slice(0, at).trim()
+      location = text.slice(at + 1).trim()
     }
+
+    let weekdayIndex = -1
+    const weekday = title.match(/周([一二三四五六日天])/)
+    if (weekday && WEEKDAY_INDEX[weekday[1]] !== undefined) {
+      weekdayIndex = WEEKDAY_INDEX[weekday[1]]
+      title = title.replace(/周[一二三四五六日天]/, '').trim()
+    }
+
+    let date = weekdayIndex >= 0 ? addDaysText(weekStart, weekdayIndex) : weekStart
+    const dateInText = explicitDate(text)
+    if (dateInText) {
+      date = dateInText
+      weekdayIndex = -1
+    }
+
+    let startIndex = 0
+    let endIndex = 1
+    const periodMatch = text.match(/第?\s*(\d{1,2})\s*[-~至到]\s*(\d{1,2})\s*节?/)
+    if (periodMatch) {
+      startIndex = Math.max(0, Math.min(10, Number(periodMatch[1]) - 1))
+      endIndex = Math.max(startIndex, Math.min(10, Number(periodMatch[2]) - 1))
+    }
+
+    title = title.replace(/第?\s*\d+\s*[-~至到]\s*\d+\s*节?/g, '')
+    title = title.replace(/\d{4}\s*[-/年]\s*\d{1,2}\s*[-/月]\s*\d{1,2}\s*[日号]?/g, '')
+    title = title.replace(/\d{1,2}\s*月\s*\d{1,2}\s*[日号]/g, '')
+    title = title.replace(/[《》]/g, '').trim()
+    if (!title || title.length < 2) return
+
+    const times = periodTimes(startIndex, endIndex, false)
+
+    drafts.push({
+      id: 'd_' + Date.now().toString(36) + '_' + drafts.length,
+      title: title,
+      location: location,
+      weekdayIndex: weekdayIndex,
+      date: date,
+      startPeriodIndex: startIndex,
+      endPeriodIndex: endIndex,
+      changeBreak: false,
+      startTime: times.start,
+      endTime: times.end
+    })
   })
 
-  return bestIndex
+  return drafts.slice(0, 20)
 }
 
 Page({
@@ -131,10 +213,10 @@ Page({
     changeBreak: false,
     list: [],
     error: '',
-    ocrLines: [],
     ocrLoading: false,
     ocrModalVisible: false,
-    ocrSelectedIndex: -1
+    ocrDrafts: [],
+    weekStartDate: mondayText()
   },
 
   onLoad: function () {
@@ -325,19 +407,20 @@ Page({
         ? data.lines.filter(function (line) { return line && line.trim() }).map(compactText)
         : []
 
-      if (lines.length === 0) {
-        that.setData({ ocrLines: [] })
-        wx.showToast({ title: '没识别到文字，换张清晰点的', icon: 'none' })
+      const drafts = buildDrafts(lines, that.data.weekStartDate)
+
+      if (drafts.length === 0) {
+        that.setData({ ocrDrafts: [] })
+        wx.showToast({ title: '没识别到有效课程，换张清晰点的', icon: 'none' })
         return
       }
 
       that.setData({
-        ocrLines: lines,
+        ocrDrafts: drafts,
         ocrModalVisible: true,
-        ocrSelectedIndex: -1
-      }, function () {
-        that.selectOcrLine(pickBestLine(lines))
+        error: ''
       })
+      wx.showToast({ title: '识别到 ' + drafts.length + ' 门课', icon: 'none' })
     }).catch(function (err) {
       wx.showToast({ title: (err && err.message) || '识别失败', icon: 'none' })
     }).then(function () {
@@ -346,59 +429,118 @@ Page({
     })
   },
 
-  onOcrLineTap: function (event) {
-    this.selectOcrLine(Number(event.currentTarget.dataset.index))
-  },
-
-  selectOcrLine: function (index) {
-    const raw = this.data.ocrLines[index]
-    if (!raw) return
-
-    const line = compactText(raw)
-    let title = line
-    let location = ''
-    const at = line.indexOf('@')
-
-    if (at >= 0) {
-      title = line.slice(0, at).trim()
-      location = line.slice(at + 1).trim()
-    }
-
-    let date = this.data.date
-    const weekday = title.match(/周([一二三四五六日天])/)
-    if (weekday) {
-      title = title.replace(/周[一二三四五六日天]/, '').trim()
-      date = nextWeekday(weekday[1])
-    }
-
-    title = title.replace(/第?\s*\d+\s*[-~至到]\s*\d+\s*节?/g, '').trim()
-    if (!title) title = line
-
-    this.setData({
-      title: title,
-      location: location,
-      date: date,
-      ocrSelectedIndex: index,
-      error: ''
-    })
-
-    wx.showToast({ title: '已填入，请确认节次和时间', icon: 'none' })
-  },
-
   onOcrModalClose: function () {
     this.setData({ ocrModalVisible: false })
   },
 
   noop: function () {},
 
-  onOcrAdd: function () {
-    if (this.addScheduleFromForm()) {
-      this.setData({
-        ocrModalVisible: false,
-        ocrLines: [],
-        ocrSelectedIndex: -1
-      })
+  onWeekStartChange: function (event) {
+    const weekStart = event.detail.value
+    const drafts = this.data.ocrDrafts.map(function (draft) {
+      if (draft.weekdayIndex >= 0) {
+        return Object.assign({}, draft, { date: addDaysText(weekStart, draft.weekdayIndex) })
+      }
+      return draft
+    })
+
+    this.setData({ weekStartDate: weekStart, ocrDrafts: drafts })
+  },
+
+  updateDraft: function (index, patch) {
+    const drafts = this.data.ocrDrafts.slice()
+    if (!drafts[index]) return
+
+    const draft = Object.assign({}, drafts[index], patch)
+    const times = periodTimes(draft.startPeriodIndex, draft.endPeriodIndex, draft.changeBreak)
+    draft.startTime = times.start
+    draft.endTime = times.end
+
+    drafts[index] = draft
+    this.setData({ ocrDrafts: drafts })
+  },
+
+  onDraftTitleInput: function (event) {
+    this.updateDraft(Number(event.currentTarget.dataset.index), { title: event.detail.value })
+  },
+
+  onDraftLocationInput: function (event) {
+    this.updateDraft(Number(event.currentTarget.dataset.index), { location: event.detail.value })
+  },
+
+  onDraftDateChange: function (event) {
+    this.updateDraft(Number(event.currentTarget.dataset.index), { date: event.detail.value })
+  },
+
+  onDraftStartPeriodChange: function (event) {
+    const index = Number(event.currentTarget.dataset.index)
+    const start = Number(event.detail.value)
+    const draft = this.data.ocrDrafts[index]
+    if (!draft) return
+
+    this.updateDraft(index, {
+      startPeriodIndex: start,
+      endPeriodIndex: Math.max(start, draft.endPeriodIndex)
+    })
+  },
+
+  onDraftEndPeriodChange: function (event) {
+    const index = Number(event.currentTarget.dataset.index)
+    const end = Number(event.detail.value)
+    const draft = this.data.ocrDrafts[index]
+    if (!draft) return
+
+    this.updateDraft(index, {
+      startPeriodIndex: Math.min(draft.startPeriodIndex, end),
+      endPeriodIndex: end
+    })
+  },
+
+  onDraftChangeBreak: function (event) {
+    this.updateDraft(Number(event.currentTarget.dataset.index), { changeBreak: event.detail.value })
+  },
+
+  onDraftDelete: function (event) {
+    const index = Number(event.currentTarget.dataset.index)
+    const drafts = this.data.ocrDrafts.filter(function (draft, i) {
+      return i !== index
+    })
+
+    this.setData({
+      ocrDrafts: drafts,
+      ocrModalVisible: drafts.length > 0
+    })
+  },
+
+  onImportDrafts: function () {
+    const drafts = this.data.ocrDrafts
+    if (!drafts.length) return
+
+    let invalid = false
+    drafts.forEach(function (draft) {
+      if (!String(draft.title || '').trim() || !draft.date) invalid = true
+    })
+    if (invalid) {
+      this.setData({ error: '有课程缺少名称或日期，请检查' })
+      return
     }
+
+    let added = 0
+    drafts.forEach(function (draft) {
+      storage.addSchedule({
+        id: 's_' + Date.now().toString(36) + '_' + added + '_' + Math.random().toString(36).slice(2, 5),
+        title: String(draft.title).trim(),
+        location: String(draft.location || '').trim(),
+        start: draft.date + ' ' + draft.startTime,
+        end: draft.date + ' ' + draft.endTime,
+        createdAt: Date.now()
+      })
+      added++
+    })
+
+    this.setData({ ocrModalVisible: false, ocrDrafts: [], error: '' })
+    this.loadList()
+    wx.showToast({ title: '已导入 ' + added + ' 门课', icon: 'success' })
   },
 
   onAdd: function () {

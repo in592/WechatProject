@@ -381,6 +381,60 @@
   margin-top: 16rpx;
 }
 
+.week-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16rpx;
+  padding: 0 8rpx;
+}
+
+.week-picker {
+  min-width: 220rpx;
+  text-align: center;
+}
+
+.draft-card {
+  margin-top: 16rpx;
+  padding: 20rpx;
+  border-radius: 18rpx;
+  background: #FFFFFF;
+  box-shadow: 0 6rpx 18rpx rgba(31, 35, 41, 0.05);
+}
+
+.draft-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.draft-index {
+  color: #65020A;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.draft-delete {
+  color: #D9365F;
+  font-size: 22rpx;
+}
+
+.draft-gap {
+  margin-top: 10rpx;
+}
+
+.draft-summary {
+  margin-top: 14rpx;
+  padding: 14rpx;
+  border-radius: 12rpx;
+  background: #E6FBF5;
+  color: #0B6B57;
+  font-size: 24rpx;
+  font-weight: 600;
+  text-align: center;
+}
+
 .modal-summary {
   margin-top: 20rpx;
   padding: 20rpx;

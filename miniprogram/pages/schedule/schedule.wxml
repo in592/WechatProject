@@ -109,71 +109,63 @@
   <view class="modal-mask" wx:if="{{ocrModalVisible}}" catchtap="onOcrModalClose">
     <scroll-view class="ocr-modal" scroll-y catchtap="noop">
       <view class="modal-head">
-        <text class="modal-title">识别结果</text>
+        <text class="modal-title">识别结果（{{ocrDrafts.length}} 门课）</text>
         <text class="modal-close" bindtap="onOcrModalClose">×</text>
       </view>
-      <view class="modal-tip">识别完成，请确认课程名、第几节和对应时间</view>
+      <view class="modal-tip">确认每门课的第几节和时间，可修改或删除，最后一次性导入</view>
 
-      <view class="modal-field">
-        <text class="modal-label">课程名</text>
-        <input class="modal-input" value="{{title}}" bindinput="onTitleInput" />
+      <view class="week-row">
+        <text class="modal-label">本周周一</text>
+        <picker mode="date" value="{{weekStartDate}}" bindchange="onWeekStartChange">
+          <view class="modal-picker week-picker">{{weekStartDate}}</view>
+        </picker>
       </view>
 
-      <view class="modal-field">
-        <text class="modal-label">地点</text>
-        <input class="modal-input" value="{{location}}" bindinput="onLocationInput" />
-      </view>
+      <view class="draft-card" wx:for="{{ocrDrafts}}" wx:key="id">
+        <view class="draft-head">
+          <text class="draft-index">课程 {{index + 1}}</text>
+          <text class="draft-delete" data-index="{{index}}" bindtap="onDraftDelete">删除</text>
+        </view>
 
-      <view class="modal-row">
-        <view class="modal-half">
-          <text class="modal-label">日期</text>
-          <picker mode="date" value="{{date}}" bindchange="onDateChange">
-            <view class="modal-picker">{{date}}</view>
-          </picker>
-        </view>
-        <view class="modal-half">
-          <text class="modal-label">前一节不同课</text>
-          <switch checked="{{changeBreak}}" color="#65020A" bindchange="onChangeBreakChange" />
-        </view>
-      </view>
+        <input class="modal-input" value="{{item.title}}" data-index="{{index}}" bindinput="onDraftTitleInput" />
+        <input class="modal-input draft-gap" value="{{item.location}}" data-index="{{index}}" bindinput="onDraftLocationInput" placeholder="地点（可选）" />
 
-      <view class="modal-row">
-        <view class="modal-half">
-          <text class="modal-label">开始节次</text>
-          <picker mode="selector" range="{{periodLabels}}" value="{{startPeriodIndex}}" bindchange="onStartPeriodChange">
-            <view class="modal-picker">{{periodLabels[startPeriodIndex]}}</view>
-          </picker>
+        <view class="modal-row">
+          <view class="modal-half">
+            <text class="modal-label">日期</text>
+            <picker mode="date" value="{{item.date}}" data-index="{{index}}" bindchange="onDraftDateChange">
+              <view class="modal-picker">{{item.date}}</view>
+            </picker>
+          </view>
+          <view class="modal-half">
+            <text class="modal-label">前一节不同课</text>
+            <switch checked="{{item.changeBreak}}" color="#65020A" data-index="{{index}}" bindchange="onDraftChangeBreak" />
+          </view>
         </view>
-        <view class="modal-half">
-          <text class="modal-label">结束节次</text>
-          <picker mode="selector" range="{{periodLabels}}" value="{{endPeriodIndex}}" bindchange="onEndPeriodChange">
-            <view class="modal-picker">{{periodLabels[endPeriodIndex]}}</view>
-          </picker>
-        </view>
-      </view>
 
-      <view class="modal-row">
-        <view class="modal-half">
-          <text class="modal-label">开始</text>
-          <picker mode="time" value="{{startTime}}" bindchange="onStartTimeChange">
-            <view class="modal-picker">{{startTime}}</view>
-          </picker>
+        <view class="modal-row">
+          <view class="modal-half">
+            <text class="modal-label">开始节次</text>
+            <picker mode="selector" range="{{periodLabels}}" value="{{item.startPeriodIndex}}" data-index="{{index}}" bindchange="onDraftStartPeriodChange">
+              <view class="modal-picker">{{periodLabels[item.startPeriodIndex]}}</view>
+            </picker>
+          </view>
+          <view class="modal-half">
+            <text class="modal-label">结束节次</text>
+            <picker mode="selector" range="{{periodLabels}}" value="{{item.endPeriodIndex}}" data-index="{{index}}" bindchange="onDraftEndPeriodChange">
+              <view class="modal-picker">{{periodLabels[item.endPeriodIndex]}}</view>
+            </picker>
+          </view>
         </view>
-        <view class="modal-half">
-          <text class="modal-label">结束</text>
-          <picker mode="time" value="{{endTime}}" bindchange="onEndTimeChange">
-            <view class="modal-picker">{{endTime}}</view>
-          </picker>
-        </view>
-      </view>
 
-      <view class="modal-summary">
-        {{startPeriodIndex === endPeriodIndex ? periodLabels[startPeriodIndex] : periodLabels[startPeriodIndex] + ' 至 ' + periodLabels[endPeriodIndex]}} · {{startTime}} - {{endTime}}
+        <view class="draft-summary">
+          {{periodLabels[item.startPeriodIndex]}} 至 {{periodLabels[item.endPeriodIndex]}} · {{item.startTime}} - {{item.endTime}}
+        </view>
       </view>
 
       <view class="modal-error" wx:if="{{error}}">{{error}}</view>
 
-      <button class="modal-add" bindtap="onOcrAdd">加入日程</button>
+      <button class="modal-add" bindtap="onImportDrafts">一键导入 {{ocrDrafts.length}} 门课</button>
     </scroll-view>
   </view>
 </view>
