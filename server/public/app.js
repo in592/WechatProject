@@ -299,6 +299,12 @@
   $('parseBtn').addEventListener('click', parseNotice)
   $('importBtn').addEventListener('click', importActivity)
   $('cancelEditBtn').addEventListener('click', cancelEdit)
+  $('noticeText').addEventListener('paste', function () {
+    // 等浏览器把剪贴板内容写入 textarea 后再自动识别
+    setTimeout(function () {
+      if ($('noticeText').value.trim()) parseNotice()
+    }, 80)
+  })
   $('noticeText').addEventListener('input', function () {
     state.parsed = null
     setWarnings([])

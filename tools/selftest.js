@@ -400,6 +400,32 @@ test('完整通知：标题、时间、地点、学分', function () {
   assert.deepStrictEqual(result.warnings, [])
 })
 
+test('真实通知：活动时间优先于报名时间', function () {
+  const text = [
+    '📣活动主题',
+    '“校园寻景，次元同游”',
+    '⏰️报名时间。',
+    '2026年11月4日晚上21：30～22：00',
+    '📍活动地点：',
+    '师生活动中心（春兰居）',
+    '🕰活动时间：',
+    '2026年11月10日19：45～21：00',
+    '🔥主办方：',
+    '动漫协会',
+    '2、按时提交作品可获得二课美育分4分。'
+  ].join('\n')
+
+  const result = parser.parse(text, { now: NOW_DATE })
+  assert.strictEqual(result.ok, true)
+  assert.strictEqual(result.activity.title, '校园寻景，次元同游')
+  assert.strictEqual(result.activity.start, '2026-11-10 19:45')
+  assert.strictEqual(result.activity.end, '2026-11-10 21:00')
+  assert.strictEqual(result.activity.location, '师生活动中心（春兰居）')
+  assert.strictEqual(result.activity.credit, 4)
+  assert.strictEqual(result.activity.organizer, '动漫协会')
+  assert.deepStrictEqual(result.warnings, [])
+})
+
 test('带字段标签的通知', function () {
   const text = [
     '活动主题：校园歌手大赛',

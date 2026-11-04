@@ -148,7 +148,7 @@ function parseMinute(value) {
 /** 识别时间：区间优先，其次单个时间 */
 function extractTime(text) {
   const colonRange = text.match(
-    /(\d{1,2})\s*[:：]\s*(\d{2})\s*(?:-|~|—|–|至|到)\s*(\d{1,2})\s*[:：]\s*(\d{2})/
+    /(\d{1,2})\s*[:：]\s*(\d{2})\s*(?:-|~|～|〜|—|–|－|至|到)\s*(\d{1,2})\s*[:：]\s*(\d{2})/
   )
   if (colonRange) {
     return {
@@ -161,7 +161,7 @@ function extractTime(text) {
   }
 
   const pointRange = text.match(
-    /(上午|下午|晚上|中午|早上)?\s*(\d{1,2})\s*[点時时]\s*(半|\d{1,2})?\s*分?\s*(?:-|~|—|–|至|到)\s*(上午|下午|晚上|中午|早上)?\s*(\d{1,2})\s*[点時时]\s*(半|\d{1,2})?\s*分?/
+    /(上午|下午|晚上|中午|早上)?\s*(\d{1,2})\s*[点時时]\s*(半|\d{1,2})?\s*分?\s*(?:-|~|～|〜|—|–|－|至|到)\s*(上午|下午|晚上|中午|早上)?\s*(\d{1,2})\s*[点時时]\s*(半|\d{1,2})?\s*分?/
   )
   if (pointRange) {
     const period1 = pointRange[1]
@@ -209,23 +209,80 @@ function isValidTime(time) {
   )
 }
 
-function extractTitle(text) {
-  const book = text.match(/《([^》]{1,60})》/)
-  if (book) return book[1].trim()
+function cleanTitle(value) {
+  return String(value || '')
+    .replace(/^[\s“”"'‘’《》]+|[\s“”"'‘’《》]+$/g, '')
+    .replace(/^[^\u4e00-\u9fa5A-Za-z0-9]+/, '')
+    .trim()
+}
 
-  const labeled = text.match(/(?:活动主题|主题|活动名称|名称)\s*[:：]\s*([^\n，。；;,]{1,60})/)
-  if (labeled) return labeled[1].trim()
+/** 取「活动时间：」这类标签后面的值；值不在同一行时取下一行 */
+function sectionValue(text, labels) {
+  const lines = String(text || '').split(/\r?\n/)
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim()
+    if (!line) continue
+
+    for (let j = 0; j < labels.length; j++) {
+      const match = line.match(new RegExp('^[^\\u4e00-\\u9fa5A-Za-z0-9]*' + labels[j] + '\\s*[:：]?\\s*(.*)$'))
+      if (!match) continue
+
+      let value = (match[1] || '').trim()
+      if (!value && i + 1 < lines.length) value = lines[i + 1].trim()
+      return value
+    }
+  }
+
+  return ''
+}
+
+/** 去掉「报名时间」段，避免把报名时间当成活动时间 */
+function stripSignupSection(text) {
+  const lines = String(text || '').split(/\r?\n/)
+  const output = []
+  let skipping = false
+
+  lines.forEach(function (line) {
+    const trimmed = line.trim()
+
+    if (/报名时间|报名日期|报名截止/.test(trimmed)) {
+      skipping = true
+      return
+    }
+
+    if (skipping) {
+      if (/活动时间|活动日期|活动地点|活动内容|活动对象|主办方|承办方|注意事项|奖项|征集方式|活动流程/.test(trimmed)) {
+        skipping = false
+      } else {
+        return
+      }
+    }
+
+    output.push(line)
+  })
+
+  return output.join('\n')
+}
+
+function extractTitle(text) {
+  const labeled = sectionValue(text, ['活动主题', '活动名称', '主题', '名称'])
+  if (labeled) {
+    const fromLabel = cleanTitle(labeled)
+    if (fromLabel) return fromLabel
+  }
+
+  const book = text.match(/《([^》]{1,60})》/)
+  if (book) return cleanTitle(book[1])
 
   const firstLine = text
     .split(/\r?\n/)
     .map(function (line) { return line.trim() })
     .filter(Boolean)[0] || ''
 
-  const cleaned = firstLine
-    .replace(/^[【\[][^】\]]*[】\]]\s*/, '')
-    .replace(/^(活动)?通知\s*[:：]?\s*/, '')
-    .replace(/[，。；;、\s]+$/, '')
-    .trim()
+  const cleaned = cleanTitle(
+    firstLine.replace(/^[【\[]\s*(?:活动通知|通知|讲座|活动预告|活动)\s*[】\]]\s*/, '')
+  )
 
   if (!cleaned) return ''
   // 首行如果直接是时间/地点，不硬当标题
@@ -235,8 +292,8 @@ function extractTitle(text) {
 }
 
 function extractLocation(text) {
-  const labeled = text.match(/(?:活动地点|地点|地址|场所)\s*[:：]\s*([^\n，。；;,]{1,50})/)
-  if (labeled) return labeled[1].trim()
+  const labeled = sectionValue(text, ['活动地点', '地点', '地址', '场所'])
+  if (labeled) return cleanTitle(labeled)
 
   const at = text.match(/(?:在|于)\s*([^\n，。；;,]{2,40}?)\s*(?:举办|举行|开展|进行|集合|签到)/)
   if (at) return at[1].trim()
@@ -245,18 +302,24 @@ function extractLocation(text) {
 }
 
 function extractCredit(text) {
+  const secondClass = text.match(/(?:二课|第二课堂|美育|学分)[^\d]{0,15}(\d+(?:\.\d+)?)\s*分/)
+  if (secondClass) return Number(secondClass[1])
+
   const before = text.match(/(\d+(?:\.\d+)?)\s*(?:个)?\s*学分/)
   if (before) return Number(before[1])
 
   const after = text.match(/学分\s*[:：]?\s*(\d+(?:\.\d+)?)/)
   if (after) return Number(after[1])
 
+  const points = text.match(/(\d+(?:\.\d+)?)\s*分/)
+  if (points) return Number(points[1])
+
   return null
 }
 
 function extractOrganizer(text) {
-  const labeled = text.match(/(?:主办方|主办单位|主办|承办方|承办单位|承办)\s*[:：]\s*([^\n，。；;,]{1,40})/)
-  if (labeled) return labeled[1].trim()
+  const labeled = sectionValue(text, ['主办方', '主办单位', '主办', '承办方', '承办单位', '承办'])
+  if (labeled) return cleanTitle(labeled)
 
   const by = text.match(/由\s*([^\n，。；;,]{2,40}?)\s*(?:主办|承办|协办)/)
   if (by) return by[1].trim()
@@ -293,8 +356,10 @@ function parse(text, options) {
 
   const now = resolveNow(options)
   const title = extractTitle(raw)
-  const dateInfo = extractDate(raw, now)
-  const timeInfo = extractTime(raw)
+  const eventSection = sectionValue(raw, ['活动时间', '活动日期', '举办时间', '活动日期时间'])
+  const fallback = stripSignupSection(raw)
+  const dateInfo = extractDate(eventSection || fallback, now)
+  const timeInfo = extractTime(eventSection || fallback)
   const location = extractLocation(raw)
   const credit = extractCredit(raw)
   const organizer = extractOrganizer(raw)
