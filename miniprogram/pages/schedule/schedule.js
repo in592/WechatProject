@@ -157,7 +157,9 @@ function normalizeScanLine(line) {
     x: Number(line && line.x) || 0,
     y: Number(line && line.y) || 0,
     w: Number(line && line.w) || 0,
-    h: Number(line && line.h) || 0
+    h: Number(line && line.h) || 0,
+    blockTop: Number(line && line.blockTop) || 0,
+    blockBottom: Number(line && line.blockBottom) || 0
   }
 }
 
@@ -281,9 +283,31 @@ function buildGridDrafts(lines, weekStart, grid) {
       location = location.replace(/\s+/g, '').trim()
 
       if (title && title.length >= 2) {
-        const startIndex = rowIndexAt(grid, cluster[0].y + cluster[0].h / 2)
-        const lastLine = cluster[cluster.length - 1]
-        let endIndex = rowIndexAt(grid, lastLine.y + lastLine.h / 2)
+        let blockTop = Infinity
+        let blockBottom = -Infinity
+
+        cluster.forEach(function (line) {
+          if (line.blockTop > 0 && line.blockBottom > 0) {
+            blockTop = Math.min(blockTop, line.blockTop)
+            blockBottom = Math.max(blockBottom, line.blockBottom)
+          }
+        })
+
+        let startIndex = -1
+        let endIndex = -1
+
+        if (isFinite(blockTop) && isFinite(blockBottom)) {
+          startIndex = rowIndexAt(grid, blockTop + 1)
+          endIndex = rowIndexAt(grid, blockBottom - 1)
+        }
+
+        if (startIndex < 0) {
+          startIndex = rowIndexAt(grid, cluster[0].y + cluster[0].h / 2)
+        }
+        if (endIndex < startIndex) {
+          const lastLine = cluster[cluster.length - 1]
+          endIndex = rowIndexAt(grid, lastLine.y + lastLine.h / 2)
+        }
         if (endIndex < startIndex) endIndex = startIndex
 
         if (startIndex >= 0) {

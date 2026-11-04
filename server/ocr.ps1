@@ -21,6 +21,12 @@ function Await($WinRtTask, $ResultType) {
   $netTask.Result
 }
 
+function Test-BlockPixel($color) {
+  $max = [Math]::Max([int]$color.R, [Math]::Max([int]$color.G, [int]$color.B))
+  $min = [Math]::Min([int]$color.R, [Math]::Min([int]$color.G, [int]$color.B))
+  return (($max - $min) -ge 18) -and ($max -le 252)
+}
+
 function Write-Result($payload) {
   $json = $payload | ConvertTo-Json -Compress -Depth 4
   [System.IO.File]::WriteAllText($OutPath, $json, (New-Object System.Text.UTF8Encoding($false)))
@@ -69,6 +75,8 @@ try {
         y = [int][Math]::Round($minY)
         w = [int][Math]::Round($maxX - $minX)
         h = [int][Math]::Round($maxY - $minY)
+        blockTop = 0
+        blockBottom = 0
       }
     }
   }
@@ -101,8 +109,6 @@ try {
     }
     if (($grayHits -ge 5) -or ($redHits -ge 5)) { $lineYs.Add($y) }
   }
-  $drawing.Dispose()
-
   $rowLines = @()
   foreach ($y in $lineYs) {
     if ($rowLines.Count -eq 0) {
@@ -112,6 +118,46 @@ try {
     if (($y - $rowLines[$rowLines.Count - 1]) -le 2) { continue }
     $rowLines += [int]$y
   }
+
+  if ($rowLines.Count -ge 2) {
+    $gridTop = [int]$rowLines[0]
+    $gridBottom = [int]$rowLines[$rowLines.Count - 1]
+    $bmpWidth = $drawing.Width
+    $bmpHeight = $drawing.Height
+
+    foreach ($line in $lines) {
+      $yCenter = [int]($line.y + $line.h / 2)
+      if ($yCenter -lt $gridTop -or $yCenter -gt $gridBottom) { continue }
+
+      $xStart = [Math]::Max(0, [int]$line.x)
+      $xEnd = [Math]::Min($bmpWidth - 1, [int]($line.x + $line.w))
+      $minTop = $yCenter
+      $maxBottom = $yCenter
+      $found = $false
+
+      for ($x = $xStart; $x -le $xEnd; $x += 2) {
+        if (-not (Test-BlockPixel $drawing.GetPixel($x, $yCenter))) { continue }
+
+        $top = $yCenter
+        $bottom = $yCenter
+        while ($top -gt $gridTop -and (Test-BlockPixel $drawing.GetPixel($x, $top - 1))) { $top-- }
+        while ($bottom -lt $gridBottom -and (Test-BlockPixel $drawing.GetPixel($x, $bottom + 1))) { $bottom++ }
+
+        if ($bottom -gt $top) {
+          if (-not $found -or $top -lt $minTop) { $minTop = $top }
+          if (-not $found -or $bottom -gt $maxBottom) { $maxBottom = $bottom }
+          $found = $true
+        }
+      }
+
+      if ($found) {
+        $line.blockTop = [int]$minTop
+        $line.blockBottom = [int]$maxBottom
+      }
+    }
+  }
+
+  $drawing.Dispose()
 
   Write-Result @{
     ok = $true
