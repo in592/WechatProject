@@ -156,5 +156,6 @@ node tools/check-miniprogram.js ./miniprogram
 
 ## 9 这台机器的已知问题
 
-**Node 尚未安装。**`node -v` 识别不到。装完 Node 才能跑后端和检查脚本。
-Git 已有（2.56.0）。
+- Node v26.13.0 已安装；后端 `node server/server.js` 监听 `127.0.0.1:3000`
+- 拍照 OCR 使用 Windows 自带中文 OCR；彩色课表识别效果最好
+- 真实 QQ 注入在本机被客户端拦截；OneBot 适配器已完成，演示用模拟上报
