@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>活动提醒 · 本地预览</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    background: #22252b;
+    color: #1f2329;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+  }
+  .phone {
+    position: relative;
+    width: 390px;
+    height: 780px;
+    padding: 16px;
+    border-radius: 48px;
+    background: #0b0d10;
+    box-shadow: 0 30px 80px rgba(0,0,0,.55);
+  }
+  .screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 36px;
+    background: #FFF8F6;
+  }
+  .status {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 24px 6px;
+    color: #1f2329;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .status span:last-child { letter-spacing: 1px; }
+  .nav {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1f2329;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .content { padding: 10px 24px; }
+  .hello { color: #65020A; font-size: 26px; font-weight: 700; }
+  .sub { margin-top: 6px; color: #8A9099; font-size: 12px; }
+  .card {
+    margin-top: 18px;
+    padding: 18px;
+    border-radius: 18px;
+    background: #FFFFFF;
+    box-shadow: 0 8px 24px rgba(31,35,41,.06);
+  }
+  .card-title { font-size: 16px; font-weight: 700; }
+  .card-meta { margin-top: 8px; color: #5A6069; font-size: 12px; line-height: 1.7; }
+  .tag {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #FFF0E6;
+    color: #8A3F0F;
+    font-size: 11px;
+  }
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    background: rgba(0,0,0,.45);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .18s ease;
+  }
+  .overlay.show { opacity: 1; visibility: visible; }
+  .dialog {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 18px;
+    background: #FFFFFF;
+    box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    transform: scale(.96);
+    transition: transform .18s ease;
+  }
+  .overlay.show .dialog { transform: scale(1); }
+  .dialog-head {
+    padding: 22px 22px 0;
+    color: #65020A;
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+  }
+  .dialog-body {
+    padding: 14px 24px 22px;
+    color: #1F2329;
+    font-size: 14px;
+    line-height: 1.7;
+    text-align: center;
+  }
+  .dialog-time {
+    margin-top: 6px;
+    color: #5A6069;
+    font-size: 12px;
+  }
+  .dialog-btn {
+    width: 100%;
+    height: 50px;
+    border: 0;
+    border-top: 1px solid #F0DDE5;
+    background: #FFFFFF;
+    color: #65020A;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .side {
+    width: 250px;
+    color: #e8eaed;
+  }
+  .side h1 { margin: 0 0 10px; font-size: 20px; }
+  .side p { margin: 8px 0; color: #aeb4bd; font-size: 13px; line-height: 1.7; }
+  .side button {
+    width: 100%;
+    height: 42px;
+    margin-top: 10px;
+    border: 1px solid #4b5563;
+    border-radius: 10px;
+    background: #2f333a;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .side .hint { margin-top: 16px; color: #7f8792; font-size: 12px; }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="screen">
+      <div class="status"><span>18:00</span><span>5G ▮▮▮</span></div>
+      <div class="nav">校园管家</div>
+      <div class="content">
+        <div class="hello">我的日程</div>
+        <div class="sub">课程日程和活动日程分开管理</div>
+        <div class="card">
+          <div class="card-title">校园寻景，次元同游</div>
+          <div class="card-meta">时间　11-10 19:45 - 21:00</div>
+          <div class="card-meta">地点　师生活动中心（春兰居）</div>
+          <span class="tag">文体活动</span>
+        </div>
+      </div>
+
+      <div class="overlay show" id="overlay">
+        <div class="dialog">
+          <div class="dialog-head">活动提醒</div>
+          <div class="dialog-body">
+            <div id="message">「校园寻景，次元同游」报名将在 10 分钟内开始</div>
+            <div class="dialog-time" id="time">时间：2026-11-04 21:30</div>
+          </div>
+          <button class="dialog-btn" id="okBtn">知道了</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="side">
+    <h1>活动提醒 · 本地预览</h1>
+    <p>小程序真实触发：App.onShow / 30 秒轮询 → wx.showModal。</p>
+    <p>当前演示：报名开始前 10 分钟提醒。</p>
+    <button id="replayBtn">再看一次</button>
+    <button id="switchBtn">切换：活动开始提醒</button>
+    <p class="hint">这是视觉预览，不会写入小程序数据。</p>
+  </aside>
+
+<script>
+  var overlay = document.getElementById('overlay')
+  var message = document.getElementById('message')
+  var time = document.getElementById('time')
+  var mode = 'signup'
+
+  function content() {
+    if (mode === 'signup') {
+      message.textContent = '「校园寻景，次元同游」报名将在 10 分钟内开始'
+      time.textContent = '时间：2026-11-04 21:30'
+    } else {
+      message.textContent = '「校园寻景，次元同游」将在 10 分钟内开始'
+      time.textContent = '时间：2026-11-10 19:45'
+    }
+  }
+
+  function show() {
+    content()
+    overlay.classList.add('show')
+  }
+
+  function hide() {
+    overlay.classList.remove('show')
+  }
+
+  document.getElementById('okBtn').addEventListener('click', hide)
+  document.getElementById('replayBtn').addEventListener('click', show)
+  document.getElementById('switchBtn').addEventListener('click', function () {
+    mode = mode === 'signup' ? 'start' : 'signup'
+    show()
+  })
+
+  window.setTimeout(show, 700)
+</script>
+</body>
+</html>

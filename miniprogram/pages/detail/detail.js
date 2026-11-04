@@ -133,6 +133,7 @@ Page({
     reminder.follow(activity)
     this.setData({ followed: true })
     wx.showToast({ title: '已设置报名提醒', icon: 'none' })
+    reminder.checkAndShow()
   },
 
   onBackToList: function () {
