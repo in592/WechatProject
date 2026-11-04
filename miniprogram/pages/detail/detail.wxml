@@ -41,6 +41,12 @@
       </view>
     </view>
 
+    <view class="remind-row" wx:if="{{activity.signupStart && !signed}}">
+      <button class="remind-btn {{followed ? 'active' : ''}}" bindtap="onToggleReminder">
+        {{followed ? '已设报名提醒' : '提醒我报名'}}
+      </button>
+    </view>
+
     <view class="notice" wx:if="{{activity.rawText}}">
       <view class="notice-title">原始通知</view>
       <view class="notice-text">{{activity.rawText}}</view>

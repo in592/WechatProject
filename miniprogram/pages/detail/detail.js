@@ -2,6 +2,7 @@ const request = require('../../utils/request')
 const signup = require('../../utils/signup')
 const agenda = require('../../utils/agenda')
 const conflict = require('../../utils/conflict')
+const reminder = require('../../utils/reminder')
 
 function typeClass(type) {
   if (type === '学术科技') return 'academic'
@@ -37,6 +38,7 @@ Page({
     error: '',
     signing: false,
     signed: false,
+    followed: false,
     typeText: '',
     typeClass: '',
     startText: '',
@@ -74,6 +76,7 @@ Page({
           loading: false,
           error: '',
           signed: signup.isSignedUp(data.activity.id),
+          followed: reminder.isFollowed(data.activity.id),
           typeText: view.typeText,
           typeClass: view.typeClass,
           startText: view.startText,
@@ -109,6 +112,27 @@ Page({
 
   onRetry: function () {
     return this.loadActivity()
+  },
+
+  onToggleReminder: function () {
+    const activity = this.data.activity
+    if (!activity) return
+
+    if (!activity.signupStart) {
+      wx.showToast({ title: '这个活动没有报名时间', icon: 'none' })
+      return
+    }
+
+    if (reminder.isFollowed(activity.id)) {
+      reminder.unfollow(activity.id)
+      this.setData({ followed: false })
+      wx.showToast({ title: '已取消报名提醒', icon: 'none' })
+      return
+    }
+
+    reminder.follow(activity)
+    this.setData({ followed: true })
+    wx.showToast({ title: '已设置报名提醒', icon: 'none' })
   },
 
   onBackToList: function () {
@@ -169,7 +193,8 @@ Page({
       } else {
         const already = signup.isSignedUp(activity.id)
         signup.saveSignup(activity)
-        this.setData({ signed: true })
+        reminder.unfollow(activity.id)
+        this.setData({ signed: true, followed: false })
 
         wx.showModal({
           title: already ? '已报名' : '报名成功',

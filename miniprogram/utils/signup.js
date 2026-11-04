@@ -22,6 +22,8 @@ function normalize(item) {
     type: item.type || '其他',
     credit: toCredit(item.credit),
     organizer: item.organizer || '',
+    signupStart: String(item.signupStart || ''),
+    signupEnd: String(item.signupEnd || ''),
     signedAt: Number(item.signedAt) || Date.now()
   }
 }
