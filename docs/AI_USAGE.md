@@ -65,7 +65,18 @@ node tools/check-miniprogram.js ./miniprogram
 - 所有提交在赛时窗口内，Git 历史可查
 - 运行时数据 `server/data.json` 已 gitignore，不提交
 
-## 7. 局限
+## 7. 运行时是否调用 AI API
+
+**没有。**
+
+- 拍照 OCR：Windows 自带 `Windows.Media.Ocr`，本地运行，不传图片、不调用第三方 API
+- 活动解析 / 冲突检测 / 提醒：纯本地算法
+- 没有 DeepSeek、阿里云百炼、硅基流动等 API Key
+- 没有模型名称需要填入运行配置
+
+DeepSeek Harness（deepseek-flash）只用于**开发阶段**的编码、测试和文档辅助，不进入小程序运行时。
+
+## 8. 局限
 
 AI 生成代码需要人工验证。本项目仍存在：
 

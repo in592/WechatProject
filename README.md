@@ -238,6 +238,8 @@ Invoke-RestMethod -Method Post `
 
 ## 9. AI 使用
 
-本项目使用 DeepSeek Harness（deepseek-flash）辅助开发。具体范围、边界和可复核方式见 [`docs/AI_USAGE.md`](docs/AI_USAGE.md)。
+本项目**运行时不调用任何外部 AI API**：拍照识别使用 Windows 自带 `Windows.Media.Ocr`，不联网、不上传图片、没有 API Key。
+
+开发阶段使用 DeepSeek Harness（deepseek-flash）辅助编码、测试和文档。具体范围、边界和可复核方式见 [`docs/AI_USAGE.md`](docs/AI_USAGE.md)。
 
 提交材料见 [`docs/SUBMISSION.md`](docs/SUBMISSION.md)。

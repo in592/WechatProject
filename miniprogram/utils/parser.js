@@ -211,7 +211,8 @@ function isValidTime(time) {
 
 function cleanTitle(value) {
   return String(value || '')
-    .replace(/^[\s“”"'‘’《》]+|[\s“”"'‘’《》]+$/g, '')
+    .replace(/[“”]/g, '')
+    .replace(/^[\s"'‘’《》]+|[\s"'‘’《》]+$/g, '')
     .replace(/^[^\u4e00-\u9fa5A-Za-z0-9]+/, '')
     .trim()
 }

@@ -2,6 +2,8 @@
 
 > 目标：评委在 3 分钟内看懂「通知 → 活动 → 冲突 → 替代时段」。
 > 先保证主线，再展示拍照课表和提醒。
+>
+> **AI 说明**：本项目运行时不调用外部 AI API；拍照 OCR 使用 Windows 本机 `Windows.Media.Ocr`。开发阶段使用 DeepSeek Harness（deepseek-flash）辅助，不进入运行时。
 
 ## 0. 演示前 5 分钟检查
 
@@ -127,6 +129,10 @@ node server/server.js
 ### 如果被问真实 QQ
 
 > OneBot 适配器、去重、解析入库已经完成，并已用模拟群消息验证；本机 QQ 注入被客户端拦截，所以现场用同一 `/api/qq/event` 入口演示，不伪造真实登录。
+
+### 如果被问 AI / API
+
+> 运行时没有接外部 AI API。拍照识别用 Windows 本机 `Windows.Media.Ocr`，不联网、没有 API Key；DeepSeek Harness（deepseek-flash）只在开发阶段辅助编码和测试，不在小程序里调用。
 
 ---
 

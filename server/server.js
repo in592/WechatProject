@@ -124,21 +124,33 @@ function importText(text, source, callback) {
   })
 }
 
-/** OneBot 11 消息 → 纯文本；去掉 @、图片等 CQ 码 */
+/** OneBot 11 消息 → 纯文本；去掉 @、图片等 CQ 码，保留换行 */
+function cleanQQText(value) {
+  return String(value || '')
+    .replace(/\[CQ:[^\]]+\]/g, ' ')
+    .replace(/\r\n?/g, '\n')
+    .replace(/[ \t\f\v]+/g, ' ')
+    .split('\n')
+    .map(function (line) { return line.trim() })
+    .filter(Boolean)
+    .join('\n')
+    .trim()
+}
+
 function oneBotText(payload) {
   if (typeof payload.raw_message === 'string' && payload.raw_message.trim()) {
-    return payload.raw_message.replace(/\[CQ:[^\]]+\]/g, ' ').replace(/\s+/g, ' ').trim()
+    return cleanQQText(payload.raw_message)
   }
   if (typeof payload.message === 'string') {
-    return payload.message.replace(/\[CQ:[^\]]+\]/g, ' ').replace(/\s+/g, ' ').trim()
+    return cleanQQText(payload.message)
   }
   if (Array.isArray(payload.message)) {
     return payload.message.map(function (segment) {
       if (!segment || segment.type !== 'text' || !segment.data) return ''
       return String(segment.data.text || '')
-    }).join(' ').replace(/\s+/g, ' ').trim()
+    }).join('\n').trim()
   }
-  if (typeof payload.text === 'string') return payload.text.trim()
+  if (typeof payload.text === 'string') return cleanQQText(payload.text)
   return ''
 }
 
