@@ -151,7 +151,7 @@
         <text class="modal-title">识别结果（{{ocrDrafts.length}} 门课）</text>
         <text class="modal-close" bindtap="onOcrModalClose">×</text>
       </view>
-      <view class="modal-tip">确认每门课的第几节和时间，可修改或删除，最后一次性导入</view>
+      <view class="modal-tip">OCR 只识别课程名和地点，节次需要你确认；未确认的课程不能导入</view>
 
       <view class="week-row">
         <text class="modal-label">本周周一</text>
@@ -163,7 +163,10 @@
       <view class="draft-card" wx:for="{{ocrDrafts}}" wx:key="id">
         <view class="draft-head">
           <text class="draft-index">课程 {{index + 1}}</text>
-          <text class="draft-delete" data-index="{{index}}" bindtap="onDraftDelete">删除</text>
+          <view class="draft-actions">
+            <text class="draft-confirm {{item.confirmed ? 'done' : ''}}" data-index="{{index}}" bindtap="onDraftConfirm">{{item.confirmed ? '已确认' : '确认节次'}}</text>
+            <text class="draft-delete" data-index="{{index}}" bindtap="onDraftDelete">删除</text>
+          </view>
         </view>
 
         <input class="modal-input" value="{{item.title}}" data-index="{{index}}" bindinput="onDraftTitleInput" />
@@ -198,7 +201,8 @@
         </view>
 
         <view class="draft-summary">
-          {{periodLabels[item.startPeriodIndex]}} 至 {{periodLabels[item.endPeriodIndex]}} · {{item.startTime}} - {{item.endTime}}
+          <block wx:if="{{item.confirmed}}">{{periodLabels[item.startPeriodIndex]}} 至 {{periodLabels[item.endPeriodIndex]}} · {{item.startTime}} - {{item.endTime}}</block>
+          <block wx:else>节次待确认，请选择节次或点「确认节次」</block>
         </view>
       </view>
 

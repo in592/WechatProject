@@ -201,6 +201,7 @@ function buildDrafts(lines, weekStart) {
       startPeriodIndex: startIndex,
       endPeriodIndex: endIndex,
       changeBreak: false,
+      confirmed: Boolean(periodMatch),
       startTime: times.start,
       endTime: times.end
     })
@@ -533,7 +534,8 @@ Page({
 
     this.updateDraft(index, {
       startPeriodIndex: start,
-      endPeriodIndex: Math.max(start, draft.endPeriodIndex)
+      endPeriodIndex: Math.max(start, draft.endPeriodIndex),
+      confirmed: true
     })
   },
 
@@ -545,8 +547,15 @@ Page({
 
     this.updateDraft(index, {
       startPeriodIndex: Math.min(draft.startPeriodIndex, end),
-      endPeriodIndex: end
+      endPeriodIndex: end,
+      confirmed: true
     })
+  },
+
+  onDraftConfirm: function (event) {
+    const index = Number(event.currentTarget.dataset.index)
+    this.setData({ error: '' })
+    this.updateDraft(index, { confirmed: true })
   },
 
   onDraftChangeBreak: function (event) {
@@ -568,6 +577,14 @@ Page({
   onImportDrafts: function () {
     const drafts = this.data.ocrDrafts
     if (!drafts.length) return
+
+    const pending = drafts.filter(function (draft) {
+      return !draft.confirmed
+    }).length
+    if (pending > 0) {
+      this.setData({ error: '还有 ' + pending + ' 门课没确认节次，请点「确认节次」或修改节次' })
+      return
+    }
 
     let invalid = false
     drafts.forEach(function (draft) {

@@ -479,6 +479,25 @@
   font-weight: 600;
 }
 
+.draft-actions {
+  display: flex;
+  align-items: center;
+}
+
+.draft-confirm {
+  margin-right: 18rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  background: #FFF0E6;
+  color: #B85516;
+  font-size: 20rpx;
+}
+
+.draft-confirm.done {
+  background: #E6FBF5;
+  color: #0B6B57;
+}
+
 .draft-delete {
   color: #D9365F;
   font-size: 22rpx;
