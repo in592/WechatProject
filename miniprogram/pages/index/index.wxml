@@ -1,8 +1,11 @@
 <view class="page">
   <view class="top">
-    <view class="hello">
-      <view class="hello-title">{{userName ? '你好，' + userName : '你好，同学'}}</view>
-      <view class="hello-sub">今天想去哪场活动？</view>
+    <view class="hello-row">
+      <view class="hello">
+        <view class="hello-title">{{userName ? '你好，' + userName : '你好，同学'}}</view>
+        <view class="hello-sub">今天想去哪场活动？</view>
+      </view>
+      <view class="conflict-toggle {{avoidConflict ? 'active' : ''}}" bindtap="onToggleConflict">避开冲突</view>
     </view>
 
     <view class="search">
@@ -23,7 +26,6 @@
         data-type="{{item}}"
         bindtap="onTypeTap"
       >{{item}}</view>
-      <view class="type-tab conflict-tab {{avoidConflict ? 'active' : ''}}" bindtap="onToggleConflict">避开冲突</view>
     </scroll-view>
   </view>
 
