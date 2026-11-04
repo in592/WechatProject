@@ -106,6 +106,13 @@ function dueList(now) {
   const current = now instanceof Date ? now.getTime() : Date.now()
   const notified = getNotified()
   const due = []
+  const seen = {}
+
+  function push(item) {
+    if (seen[item.key]) return
+    seen[item.key] = true
+    due.push(item)
+  }
 
   getFollowed().forEach(function (item) {
     const signupTs = toTimestamp(item.signupStart)
@@ -115,15 +122,30 @@ function dueList(now) {
     const key = 'signup:' + String(item.id)
     if (diff < 0 || diff > WINDOW || notified[key]) return
 
-    due.push({
+    const signed = signup.isSignedUp(item.id)
+    push({
       key: key,
       title: item.title || '活动',
       time: item.signupStart,
-      content: '「' + (item.title || '活动') + '」报名将在 10 分钟内开始'
+      content: '「' + (item.title || '活动') + '」报名将在 10 分钟内开始' + (signed ? '（你已报名）' : '')
     })
   })
 
   signup.getSignups().forEach(function (item) {
+    const signupTs = toTimestamp(item.signupStart)
+    const signupDiff = signupTs - current
+    const signupKey = 'signup:' + String(item.id)
+
+    // B 方案：已报名活动也提醒报名开始时间
+    if (isFinite(signupTs) && signupDiff >= 0 && signupDiff <= WINDOW && !notified[signupKey]) {
+      push({
+        key: signupKey,
+        title: item.title || '活动',
+        time: item.signupStart,
+        content: '「' + (item.title || '活动') + '」报名将在 10 分钟内开始（你已报名）'
+      })
+    }
+
     const startTs = toTimestamp(item.start)
     if (!isFinite(startTs)) return
 
@@ -131,7 +153,7 @@ function dueList(now) {
     const key = 'start:' + String(item.id)
     if (diff < 0 || diff > WINDOW || notified[key]) return
 
-    due.push({
+    push({
       key: key,
       title: item.title || '活动',
       time: item.start,

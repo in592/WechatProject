@@ -201,7 +201,12 @@ Page({
           title: already ? '已报名' : '报名成功',
           content: already ? '你已经报过「' + (activity.title || '活动') + '」' : '已报名「' + (activity.title || '活动') + '」',
           showCancel: false,
-          confirmText: '好的'
+          confirmText: '好的',
+          success: function () {
+            setTimeout(function () {
+              reminder.checkAndShow()
+            }, 300)
+          }
         })
       }
     } finally {
