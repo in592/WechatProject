@@ -53,7 +53,8 @@ Page({
     typeOptions: TYPE_OPTIONS,
     loading: true,
     error: '',
-    fromCache: false
+    fromCache: false,
+    loaded: false
   },
 
   onLoad: function () {
@@ -61,6 +62,12 @@ Page({
     const user = (app && app.globalData && app.globalData.user) || auth.getUser()
     this.setData({ userName: user ? user.name : '' })
     return this.loadActivities()
+  },
+
+  onShow: function () {
+    if (this.data.loaded) {
+      return this.loadActivities()
+    }
   },
 
   onPullDownRefresh: function () {
@@ -84,7 +91,7 @@ Page({
           // 缓存失败不影响本次展示
         }
 
-        that.setData({ activities: list, loading: false, fromCache: false })
+        that.setData({ activities: list, loading: false, fromCache: false, loaded: true })
         that.applyFilters(list)
       })
       .catch(function () {
@@ -100,6 +107,7 @@ Page({
           activities: list,
           loading: false,
           fromCache: list.length > 0,
+          loaded: true,
           error: list.length > 0 ? '' : '网络异常，请检查后端是否启动'
         })
         that.applyFilters(list)

@@ -31,7 +31,9 @@ function request(options) {
 
         const message = (res.data && res.data.error) || ('请求失败（' + res.statusCode + '）')
         wx.showToast({ title: message, icon: 'none' })
-        reject(new Error(message))
+        const requestError = new Error(message)
+        requestError.statusCode = res.statusCode
+        reject(requestError)
       },
       fail: function (err) {
         const message = '网络异常，请检查后端是否启动'

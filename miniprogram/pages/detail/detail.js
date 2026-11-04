@@ -83,13 +83,40 @@ Page({
           signupText: view.signupText
         })
       })
-      .catch(function () {
-        that.setData({ loading: false, error: '活动不存在或已删除', activity: null })
+      .catch(function (err) {
+        const notFound = err && err.statusCode === 404
+
+        if (notFound) {
+          try {
+            const cache = wx.getStorageSync('activities_cache')
+            if (Array.isArray(cache)) {
+              wx.setStorageSync('activities_cache', cache.filter(function (item) {
+                return String(item.id) !== String(that.data.id)
+              }))
+            }
+          } catch (cacheErr) {
+            // 缓存清理失败不影响错误提示
+          }
+        }
+
+        that.setData({
+          loading: false,
+          activity: null,
+          error: notFound ? '活动不存在或已删除' : '加载失败，请检查网络或后端是否启动'
+        })
       })
   },
 
   onRetry: function () {
     return this.loadActivity()
+  },
+
+  onBackToList: function () {
+    wx.navigateBack({
+      fail: function () {
+        wx.switchTab({ url: '/pages/index/index' })
+      }
+    })
   },
 
   onShow: function () {

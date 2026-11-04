@@ -218,3 +218,10 @@
   font-size: 26rpx;
   line-height: 72rpx;
 }
+
+.back-link {
+  margin-top: 24rpx;
+  color: #65020A;
+  font-size: 24rpx;
+  text-decoration: underline;
+}

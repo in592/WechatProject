@@ -8,6 +8,7 @@
     <view class="state-title">加载失败</view>
     <view class="state-desc">{{error}}</view>
     <button class="retry" bindtap="onRetry">重试</button>
+    <view class="back-link" bindtap="onBackToList">返回活动列表</view>
   </view>
 
   <block wx:elif="{{activity}}">
