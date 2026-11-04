@@ -75,7 +75,7 @@
   </view>
 
   <view class="list" wx:else>
-    <view class="item" wx:for="{{list}}" wx:key="id">
+    <view class="item {{item.dateGap ? 'date-gap' : ''}}" wx:for="{{list}}" wx:key="id">
       <view class="date-badge">
         <text class="date">{{item.dateText}}</text>
         <text class="week">{{item.weekdayText}}</text>
@@ -103,7 +103,7 @@
     </view>
 
     <view class="list" wx:else>
-      <view class="item" wx:for="{{activityList}}" wx:key="id">
+      <view class="item {{item.dateGap ? 'date-gap' : ''}}" wx:for="{{activityList}}" wx:key="id">
         <view class="date-badge">
           <text class="date">{{item.dateText}}</text>
           <text class="week">{{item.weekdayText}}</text>

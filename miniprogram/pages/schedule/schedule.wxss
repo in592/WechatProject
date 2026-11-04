@@ -244,6 +244,10 @@
   box-shadow: 0 6rpx 18rpx rgba(31, 35, 41, 0.05);
 }
 
+.item.date-gap {
+  margin-top: 28rpx;
+}
+
 .date-badge {
   flex: none;
   width: 96rpx;

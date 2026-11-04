@@ -455,30 +455,42 @@ Page({
       return conflict.toTimestamp(a.start) - conflict.toTimestamp(b.start)
     })
 
+    let previousDate = ''
     const list = raw.map(function (item) {
+      const itemDate = dateText(item.start)
+      const dateGap = previousDate !== '' && itemDate !== previousDate
+      previousDate = itemDate
+
       return {
         id: String(item.id || ''),
         title: item.title || '未命名日程',
         location: item.location || '',
-        dateText: dateText(item.start),
+        dateText: itemDate,
         weekdayText: weekdayName(item.start),
-        timeText: timeText(item.start, item.end)
+        timeText: timeText(item.start, item.end),
+        dateGap: dateGap
       }
     })
 
+    let previousActivityDate = ''
     const activities = signup.getSignups().slice().sort(function (a, b) {
       return conflict.toTimestamp(a.start) - conflict.toTimestamp(b.start)
     }).map(function (item) {
+      const itemDate = dateText(item.start)
+      const dateGap = previousActivityDate !== '' && itemDate !== previousActivityDate
+      previousActivityDate = itemDate
+
       return {
         id: String(item.id || ''),
         title: item.title || '未命名活动',
         location: item.location || '',
-        dateText: dateText(item.start),
+        dateText: itemDate,
         weekdayText: weekdayName(item.start),
         timeText: timeText(item.start, item.end),
         typeText: item.type || '其他',
         typeClass: typeClass(item.type),
-        creditText: item.credit === null || item.credit === undefined ? '未标注' : item.credit + ' 学分'
+        creditText: item.credit === null || item.credit === undefined ? '未标注' : item.credit + ' 学分',
+        dateGap: dateGap
       }
     })
 
