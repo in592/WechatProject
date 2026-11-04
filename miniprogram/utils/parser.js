@@ -229,7 +229,9 @@ function sectionValue(text, labels) {
       if (!match) continue
 
       let value = (match[1] || '').trim()
-      if (!value && i + 1 < lines.length) value = lines[i + 1].trim()
+      if (!value || /^[。．：:、，,；;]+$/.test(value)) {
+        value = i + 1 < lines.length ? lines[i + 1].trim() : ''
+      }
       return value
     }
   }
@@ -364,6 +366,45 @@ function parse(text, options) {
   const credit = extractCredit(raw)
   const organizer = extractOrganizer(raw)
 
+  const signupSection = sectionValue(raw, ['报名时间', '报名日期', '报名截止'])
+  const signupDateInfo = extractDate(signupSection, now)
+  const signupTimeInfo = extractTime(signupSection)
+  let signupStart = ''
+  let signupEnd = ''
+
+  if (signupDateInfo && signupTimeInfo && isValidTime(signupTimeInfo)) {
+    const signupStartDate = new Date(
+      signupDateInfo.date.getFullYear(),
+      signupDateInfo.date.getMonth(),
+      signupDateInfo.date.getDate(),
+      signupTimeInfo.startHour,
+      signupTimeInfo.startMinute,
+      0,
+      0
+    )
+
+    let signupEndDate
+    if (signupTimeInfo.inferredEnd) {
+      signupEndDate = new Date(signupStartDate.getTime() + DEFAULT_DURATION)
+    } else {
+      signupEndDate = new Date(
+        signupDateInfo.date.getFullYear(),
+        signupDateInfo.date.getMonth(),
+        signupDateInfo.date.getDate(),
+        signupTimeInfo.endHour,
+        signupTimeInfo.endMinute,
+        0,
+        0
+      )
+      if (signupEndDate.getTime() <= signupStartDate.getTime()) {
+        signupEndDate = new Date(signupEndDate.getTime() + DAY)
+      }
+    }
+
+    signupStart = formatDateTime(signupStartDate)
+    signupEnd = formatDateTime(signupEndDate)
+  }
+
   const warnings = []
   let start = null
   let end = null
@@ -421,7 +462,9 @@ function parse(text, options) {
       end: end ? formatDateTime(end) : '',
       location: location,
       credit: credit,
-      organizer: organizer
+      organizer: organizer,
+      signupStart: signupStart,
+      signupEnd: signupEnd
     },
     warnings: warnings
   }

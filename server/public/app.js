@@ -51,7 +51,8 @@
     $('fStart').value = toInputValue(item.start)
     $('fEnd').value = toInputValue(item.end)
     $('fLocation').value = item.location || ''
-    $('fCredit').value = item.credit === null || item.credit === undefined ? '' : item.credit
+    $('fSignupStart').value = toInputValue(item.signupStart)
+    $('fSignupEnd').value = toInputValue(item.signupEnd)
     $('fType').value = item.type || '其他'
   }
 
@@ -60,13 +61,13 @@
   }
 
   function collectForm() {
-    var creditValue = $('fCredit').value
     return {
       title: $('fTitle').value.trim(),
       start: fromInputValue($('fStart').value),
       end: fromInputValue($('fEnd').value),
       location: $('fLocation').value.trim(),
-      credit: creditValue === '' ? null : Number(creditValue),
+      signupStart: fromInputValue($('fSignupStart').value),
+      signupEnd: fromInputValue($('fSignupEnd').value),
       type: $('fType').value
     }
   }
@@ -119,12 +120,15 @@
 
     body.innerHTML = state.activities.map(function (item) {
       var type = item.type || '其他'
+      var signupText = item.signupStart
+        ? item.signupStart + (item.signupEnd ? ' → ' + item.signupEnd : '')
+        : '—'
       return '<tr>' +
         '<td class="title-cell" title="' + escapeHtml(item.title || '') + '">' + escapeHtml(item.title || '未命名活动') + '</td>' +
         '<td class="time-cell">' + escapeHtml(item.start || '—') +
           (item.end ? '<span class="muted">→ ' + escapeHtml(item.end) + '</span>' : '') + '</td>' +
         '<td>' + escapeHtml(item.location || '—') + '</td>' +
-        '<td>' + (item.credit === null || item.credit === undefined ? '—' : escapeHtml(item.credit)) + '</td>' +
+        '<td class="time-cell">' + escapeHtml(signupText) + '</td>' +
         '<td><span class="tag ' + typeClass(type) + '">' + escapeHtml(type) + '</span></td>' +
         '<td class="source">' + escapeHtml(sourceLabel(item.source)) + '</td>' +
         '<td class="ops">' +

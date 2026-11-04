@@ -103,6 +103,8 @@ function importText(text, source, callback) {
     location: parsed.activity.location,
     credit: parsed.activity.credit,
     organizer: parsed.activity.organizer,
+    signupStart: parsed.activity.signupStart,
+    signupEnd: parsed.activity.signupEnd,
     type: guessType(text),
     source: source,
     rawText: text,
@@ -322,6 +324,8 @@ const server = http.createServer(function (req, res) {
           location: parsed.activity.location,
           credit: parsed.activity.credit,
           organizer: parsed.activity.organizer,
+          signupStart: parsed.activity.signupStart,
+          signupEnd: parsed.activity.signupEnd,
           type: guessType(text)
         },
         warnings: parsed.warnings
@@ -621,6 +625,22 @@ const server = http.createServer(function (req, res) {
           else next.credit = credit
         }
       }
+
+      ;['signupStart', 'signupEnd'].forEach(function (key) {
+        if (invalid) return
+        if (payload[key] === undefined) return
+
+        const value = String(payload[key] || '').trim()
+        if (!value) {
+          next[key] = ''
+          return
+        }
+        if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(value)) {
+          invalid = (key === 'signupStart' ? '报名开始时间' : '报名结束时间') + '格式应为 YYYY-MM-DD HH:mm'
+          return
+        }
+        next[key] = value
+      })
 
       if (payload.type !== undefined) {
         next.type = String(payload.type || '其他').trim() || '其他'

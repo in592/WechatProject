@@ -27,8 +27,8 @@
         <text class="value">{{activity.location || '未标注'}}</text>
       </view>
       <view class="row">
-        <text class="label">学分</text>
-        <text class="value">{{creditText}}</text>
+        <text class="label">报名时间</text>
+        <text class="value">{{signupText}}</text>
       </view>
       <view class="row">
         <text class="label">类型</text>

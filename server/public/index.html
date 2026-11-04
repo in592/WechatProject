@@ -67,8 +67,12 @@
           <input id="fLocation" type="text" placeholder="活动地点">
         </label>
         <label class="field">
-          <span class="label">学分</span>
-          <input id="fCredit" type="number" step="0.5" min="0" placeholder="可留空">
+          <span class="label">报名开始</span>
+          <input id="fSignupStart" type="datetime-local">
+        </label>
+        <label class="field">
+          <span class="label">报名结束</span>
+          <input id="fSignupEnd" type="datetime-local">
         </label>
         <label class="field span-2">
           <span class="label">类型</span>
@@ -96,7 +100,7 @@
               <th>标题</th>
               <th>时间</th>
               <th>地点</th>
-              <th>学分</th>
+              <th>报名时间</th>
               <th>类型</th>
               <th>来源</th>
               <th class="ops-head">操作</th>

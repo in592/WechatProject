@@ -22,7 +22,10 @@ function decorate(activity) {
     startText: start || '时间待定',
     endText: end,
     organizerText: activity.organizer || '未标注',
-    creditText: credit === null || credit === undefined ? '未标注' : credit + ' 学分'
+    creditText: credit === null || credit === undefined ? '未标注' : credit + ' 学分',
+    signupText: activity.signupStart
+      ? activity.signupStart + (activity.signupEnd ? ' - ' + activity.signupEnd : '')
+      : '未标注'
   }
 }
 
@@ -39,7 +42,8 @@ Page({
     startText: '',
     endText: '',
     organizerText: '',
-    creditText: ''
+    creditText: '',
+    signupText: ''
   },
 
   onLoad: function (options) {
@@ -75,7 +79,8 @@ Page({
           startText: view.startText,
           endText: view.endText,
           organizerText: view.organizerText,
-          creditText: view.creditText
+          creditText: view.creditText,
+          signupText: view.signupText
         })
       })
       .catch(function () {

@@ -423,6 +423,8 @@ test('真实通知：活动时间优先于报名时间', function () {
   assert.strictEqual(result.activity.location, '师生活动中心（春兰居）')
   assert.strictEqual(result.activity.credit, 4)
   assert.strictEqual(result.activity.organizer, '动漫协会')
+  assert.strictEqual(result.activity.signupStart, '2026-11-04 21:30')
+  assert.strictEqual(result.activity.signupEnd, '2026-11-04 22:00')
   assert.deepStrictEqual(result.warnings, [])
 })
 
