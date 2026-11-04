@@ -60,7 +60,7 @@ node tools/selftest.js
 node tools/check-miniprogram.js ./miniprogram
 ```
 
-- 46 项算法自测
+- 47 项算法自测
 - 5 个页面静态检查，`ERROR 0`
 - 所有提交在赛时窗口内，Git 历史可查
 - 运行时数据 `server/data.json` 已 gitignore，不提交

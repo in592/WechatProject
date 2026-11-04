@@ -428,6 +428,30 @@ test('真实通知：活动时间优先于报名时间', function () {
   assert.deepStrictEqual(result.warnings, [])
 })
 
+test('真实通知：收集表开放时间作为报名时间', function () {
+  const text = [
+    '“方寸绘路，匠心竞技”——电子协会电子电路设计技能大赛',
+    '⏰ 活动时间：',
+    '2026年11月7日 14:00—18:00',
+    '📍 活动地点：',
+    '医学技术与工程学院202室',
+    '① 活动报名：',
+    '通过线上收集表报名（限额30人，额满即止）。',
+    '🕐 收集表开放时间：',
+    '2026年11月4日（周三）20:00—22:00',
+    '② 证书认证报名：',
+    '另行通知'
+  ].join('\n')
+
+  const result = parser.parse(text, { now: NOW_DATE })
+  assert.strictEqual(result.ok, true)
+  assert.strictEqual(result.activity.start, '2026-11-07 14:00')
+  assert.strictEqual(result.activity.end, '2026-11-07 18:00')
+  assert.strictEqual(result.activity.location, '医学技术与工程学院202室')
+  assert.strictEqual(result.activity.signupStart, '2026-11-04 20:00')
+  assert.strictEqual(result.activity.signupEnd, '2026-11-04 22:00')
+})
+
 test('带字段标签的通知', function () {
   const text = [
     '活动主题：校园歌手大赛',

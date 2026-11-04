@@ -248,13 +248,13 @@ function stripSignupSection(text) {
   lines.forEach(function (line) {
     const trimmed = line.trim()
 
-    if (/报名时间|报名日期|报名截止/.test(trimmed)) {
+    if (/报名时间|报名日期|报名截止|收集表开放时间|收集表报名时间|报名开放时间|表单开放时间/.test(trimmed)) {
       skipping = true
       return
     }
 
     if (skipping) {
-      if (/活动时间|活动日期|活动地点|活动内容|活动对象|主办方|承办方|注意事项|奖项|征集方式|活动流程/.test(trimmed)) {
+      if (/活动时间|活动日期|活动地点|活动内容|活动对象|主办方|承办方|注意事项|奖项|征集方式|活动流程|证书认证|认证报名/.test(trimmed)) {
         skipping = false
       } else {
         return
@@ -366,7 +366,15 @@ function parse(text, options) {
   const credit = extractCredit(raw)
   const organizer = extractOrganizer(raw)
 
-  const signupSection = sectionValue(raw, ['报名时间', '报名日期', '报名截止'])
+  const signupSection = sectionValue(raw, [
+    '报名时间',
+    '报名日期',
+    '报名截止',
+    '收集表开放时间',
+    '收集表报名时间',
+    '报名开放时间',
+    '表单开放时间'
+  ])
   const signupDateInfo = extractDate(signupSection, now)
   const signupTimeInfo = extractTime(signupSection)
   let signupStart = ''

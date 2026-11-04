@@ -42,7 +42,7 @@ git ls-files | Select-String 'data.json|token|secret|key'
 
 预期：
 
-- `selftest.js`：46 项全部通过
+- `selftest.js`：47 项全部通过
 - 静态检查：`ERROR 0` / `WARN 0`
 - `git status`：无未提交改动
 - 没有 `server/data.json`、QQ Token、API Key

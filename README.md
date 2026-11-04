@@ -28,6 +28,7 @@
 
 - 粘贴整段通知，**粘贴后自动解析**，也可手动点「解析」
 - 识别「活动时间」优先，不会把「报名时间」当成活动时间
+- 识别「收集表开放时间」并作为报名开始/结束时间
 - 编辑 / 删除活动；显示来源（网页 / QQ）
 - 通知里的「二课美育分 4 分」「主办方」「地点」等可识别
 - 后台表格显示活动时间与报名时间两列
@@ -137,7 +138,7 @@ node tools/selftest.js
 当前结果：
 
 - 静态检查：5 个页面 PASS，`ERROR 0`
-- 算法自测：46 项全部通过
+- 算法自测：47 项全部通过
 
 ---
 
@@ -186,7 +187,7 @@ ea-hackathon/
       reminder.js           前台提醒
       storage.js / signup.js / auth.js / request.js
   tools/
-    selftest.js             46 项算法自测
+    selftest.js             47 项算法自测
     check-miniprogram.js    页面静态检查
 ```
 
