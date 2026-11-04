@@ -5,6 +5,45 @@
 >
 > **AI 说明**：本项目运行时不调用外部 AI API；拍照 OCR 使用 Windows 本机 `Windows.Media.Ocr`。开发阶段使用 DeepSeek Harness（deepseek-flash）辅助，不进入运行时。
 
+## AI / API 口播文案（建议 0:00-0:20）
+
+### 版本 A：20 秒，放开头
+
+> 先说明本作品的 AI 使用情况。
+>
+> **运行时，本作品没有接入任何外部 AI API**，所以没有 API 提供商、模型名称或 API Key 需要配置。拍照识别使用的是 **Windows 自带的 `Windows.Media.Ocr`**，在本机完成，不上传图片。
+>
+> **开发阶段**，我使用了 **DeepSeek Harness**，底层模型是 **`deepseek-flash`**，主要帮我做三件事：生成页面和接口代码、补充算法测试用例、整理文档。它**不进入小程序的运行逻辑**。
+>
+> 所以这个作品不是“调用大模型”的产品，AI 是开发提效工具；运行时的解析、冲突检测、替代时段和提醒，都是可复核的本地算法。
+
+### 版本 B：30 秒，评委追问时补充
+
+> 如果问 AI 具体实现了什么，分开发和运行两块。
+>
+> **开发阶段**：DeepSeek Harness / `deepseek-flash` 帮我生成小程序页面骨架、通知解析和冲突算法的初稿，补充 47 项自测用例，整理 README 和演示脚本。
+>
+> **运行阶段**：没有任何生成式 AI 调用。活动解析是规则匹配，冲突检测是半开区间算法，替代时段是本地时间窗口计算，提醒是本地定时检查；拍照 OCR 用 Windows 本机 OCR。
+>
+> **没有 API Key**：仓库里没有 `.env`、没有 Token、没有把任何密钥写进代码。
+
+### 口播时不要说
+
+- ❌ “我们接入了 DeepSeek API”（运行期没有）
+- ❌ “用了大模型做推荐”（推荐是规则/时间窗口）
+- ❌ “OCR 是云 AI”（是 Windows 本机 OCR）
+
+### 可以放在视频里的字幕卡
+
+```text
+AI / API
+运行时：不接外部 AI API
+OCR：Windows.Media.Ocr（本地）
+开发：DeepSeek Harness · deepseek-flash
+用途：代码 / 测试 / 文档，不进入运行时
+API Key：无
+```
+
 ## 0. 演示前 5 分钟检查
 
 ```powershell
