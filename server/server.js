@@ -456,10 +456,21 @@ const server = http.createServer(function (req, res) {
         }
 
         const lines = Array.isArray(result.lines)
-          ? result.lines.filter(function (line) { return typeof line === 'string' && line.trim() })
+          ? result.lines.map(function (line) {
+            return typeof line === 'string' ? { text: line } : line
+          }).filter(function (line) {
+            return line && typeof line.text === 'string' && line.text.trim()
+          })
           : []
 
-        finish(200, { ok: true, lines: lines, text: lines.join('\n') })
+        finish(200, {
+          ok: true,
+          width: Number(result.width) || 0,
+          height: Number(result.height) || 0,
+          rowLines: Array.isArray(result.rowLines) ? result.rowLines.map(Number) : [],
+          lines: lines,
+          text: lines.map(function (line) { return line.text }).join('\n')
+        })
       })
     })
     return

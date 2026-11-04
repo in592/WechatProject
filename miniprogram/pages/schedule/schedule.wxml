@@ -151,7 +151,7 @@
         <text class="modal-title">识别结果（{{ocrDrafts.length}} 门课）</text>
         <text class="modal-close" bindtap="onOcrModalClose">×</text>
       </view>
-      <view class="modal-tip">OCR 只识别课程名和地点，节次需要你确认；未确认的课程不能导入</view>
+      <view class="modal-tip">自动定位星期和起始节次；请确认起止节次，未确认不能导入</view>
 
       <view class="week-row">
         <text class="modal-label">本周周一</text>
@@ -199,6 +199,8 @@
             </picker>
           </view>
         </view>
+
+        <view class="draft-grid" wx:if="{{item.gridText}}">自动定位：{{item.gridText}}，请确认起止节次</view>
 
         <view class="draft-summary">
           <block wx:if="{{item.confirmed}}">{{periodLabels[item.startPeriodIndex]}} 至 {{periodLabels[item.endPeriodIndex]}} · {{item.startTime}} - {{item.endTime}}</block>

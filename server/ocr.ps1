@@ -46,10 +46,79 @@ try {
   $result = Await ($engine.RecognizeAsync($bitmap)) ([Windows.Media.Ocr.OcrResult])
   $lines = @()
   foreach ($line in $result.Lines) {
-    $lines += $line.Text
+    $lineText = $line.Text
+    $minX = [double]::MaxValue
+    $minY = [double]::MaxValue
+    $maxX = 0.0
+    $maxY = 0.0
+    $hasBox = $false
+
+    foreach ($word in $line.Words) {
+      $rect = $word.BoundingRect
+      $hasBox = $true
+      if ($rect.X -lt $minX) { $minX = $rect.X }
+      if ($rect.Y -lt $minY) { $minY = $rect.Y }
+      if (($rect.X + $rect.Width) -gt $maxX) { $maxX = $rect.X + $rect.Width }
+      if (($rect.Y + $rect.Height) -gt $maxY) { $maxY = $rect.Y + $rect.Height }
+    }
+
+    if ($lineText -and $hasBox) {
+      $lines += [pscustomobject]@{
+        text = $lineText
+        x = [int][Math]::Round($minX)
+        y = [int][Math]::Round($minY)
+        w = [int][Math]::Round($maxX - $minX)
+        h = [int][Math]::Round($maxY - $minY)
+      }
+    }
   }
 
-  Write-Result @{ ok = $true; lines = $lines }
-} catch {
+  Add-Type -AssemblyName System.Drawing
+  $drawing = New-Object System.Drawing.Bitmap($Path)
+  $sampleXs = @()
+  for ($i = 1; $i -le 13; $i++) {
+    $sampleXs += [int]($drawing.Width * $i / 14)
+  }
+
+  $lineYs = New-Object System.Collections.Generic.List[int]
+  for ($y = 0; $y -lt $drawing.Height; $y++) {
+    $grayHits = 0
+    $redHits = 0
+    foreach ($x in $sampleXs) {
+      $color = $drawing.GetPixel($x, $y)
+      $r = [int]$color.R
+      $g = [int]$color.G
+      $b = [int]$color.B
+      $max = [Math]::Max($r, [Math]::Max($g, $b))
+      $min = [Math]::Min($r, [Math]::Min($g, $b))
+
+      if ((($max - $min) -lt 16) -and ($max -ge 190) -and ($max -le 225)) {
+        $grayHits++
+      }
+      if (($r - $g -gt 35) -and ($r - $b -gt 35)) {
+        $redHits++
+      }
+    }
+    if (($grayHits -ge 5) -or ($redHits -ge 5)) { $lineYs.Add($y) }
+  }
+  $drawing.Dispose()
+
+  $rowLines = @()
+  foreach ($y in $lineYs) {
+    if ($rowLines.Count -eq 0) {
+      $rowLines += [int]$y
+      continue
+    }
+    if (($y - $rowLines[$rowLines.Count - 1]) -le 2) { continue }
+    $rowLines += [int]$y
+  }
+
+  Write-Result @{
+    ok = $true
+    width = [int]$decoder.PixelWidth
+    height = [int]$decoder.PixelHeight
+    lines = $lines
+    rowLines = $rowLines
+  }} catch {
   Write-Result @{ ok = $false; error = $_.Exception.Message }
 }

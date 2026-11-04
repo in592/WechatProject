@@ -147,11 +147,198 @@ function isNoiseLine(text) {
   return false
 }
 
-function buildDrafts(lines, weekStart) {
-  const drafts = []
+function normalizeScanLine(line) {
+  if (typeof line === 'string') {
+    return { text: compactText(line), x: 0, y: 0, w: 0, h: 0 }
+  }
+
+  return {
+    text: compactText(line && line.text),
+    x: Number(line && line.x) || 0,
+    y: Number(line && line.y) || 0,
+    w: Number(line && line.w) || 0,
+    h: Number(line && line.h) || 0
+  }
+}
+
+function detectGrid(lines, meta) {
+  const width = Number(meta && meta.width) || 0
+  const rows = (meta && Array.isArray(meta.rowLines) ? meta.rowLines : [])
+    .map(Number)
+    .filter(function (value) { return isFinite(value) })
+    .sort(function (a, b) { return a - b })
+
+  if (!width || rows.length < 4) return null
+
+  const headers = []
 
   lines.forEach(function (line) {
-    const text = compactText(line)
+    const match = line.text.match(/^周([一二三四五六日天])$/)
+    if (!match || WEEKDAY_INDEX[match[1]] === undefined) return
+    headers.push({
+      index: WEEKDAY_INDEX[match[1]],
+      x: line.x + line.w / 2
+    })
+  })
+
+  if (!headers.length) return null
+  headers.sort(function (a, b) { return a.index - b.index })
+
+  let spacing = width / 7
+  if (headers.length >= 2) {
+    const first = headers[0]
+    const last = headers[headers.length - 1]
+    if (last.index > first.index) {
+      spacing = (last.x - first.x) / (last.index - first.index)
+    }
+  }
+  if (spacing <= 0) return null
+
+  const columns = []
+  for (let i = 0; i < 7; i++) {
+    const known = headers.filter(function (item) { return item.index === i })[0]
+    columns[i] = known ? known.x : headers[0].x + (i - headers[0].index) * spacing
+  }
+
+  const heights = []
+  for (let i = 1; i < rows.length; i++) heights.push(rows[i] - rows[i - 1])
+  heights.sort(function (a, b) { return a - b })
+  const rowHeight = heights[Math.floor(heights.length / 2)] || 120
+
+  return {
+    width: width,
+    rows: rows,
+    columns: columns,
+    spacing: spacing,
+    rowHeight: rowHeight
+  }
+}
+
+function rowIndexAt(grid, y) {
+  for (let i = 0; i < grid.rows.length - 1; i++) {
+    if (y >= grid.rows[i] && y < grid.rows[i + 1]) return i
+  }
+  return -1
+}
+
+function buildGridDrafts(lines, weekStart, grid) {
+  const buckets = {}
+  const columnNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+
+  lines.forEach(function (line) {
+    if (isNoiseLine(line.text)) {
+      // 纯数字可能是教室号（如 301），保留为同一门课的续行
+      if (!/^\d{1,4}$/.test(line.text)) return
+      if (line.y < grid.rows[1]) return
+      if (line.x < grid.columns[0] - grid.spacing * 0.5) return
+    }
+
+    const centerX = line.x + line.w / 2
+    let column = -1
+    let best = Infinity
+
+    grid.columns.forEach(function (x, index) {
+      const distance = Math.abs(x - centerX)
+      if (distance < best) {
+        best = distance
+        column = index
+      }
+    })
+
+    if (column < 0 || best > grid.spacing * 0.7) return
+
+    const centerY = line.y + line.h / 2
+    if (rowIndexAt(grid, centerY) < 0) return
+
+    if (!buckets[column]) buckets[column] = []
+    buckets[column].push(line)
+  })
+
+  const drafts = []
+
+  Object.keys(buckets).map(Number).sort(function (a, b) { return a - b }).forEach(function (column) {
+    const list = buckets[column].slice().sort(function (a, b) { return a.y - b.y })
+    let cluster = []
+
+    function flush() {
+      if (!cluster.length) return
+
+      const joined = compactText(cluster.map(function (line) { return line.text }).join(' '))
+      let title = joined
+      let location = ''
+      const at = joined.indexOf('@')
+
+      if (at >= 0) {
+        title = joined.slice(0, at).trim()
+        location = joined.slice(at + 1).trim()
+      }
+
+      title = title.replace(/周[一二三四五六日天]/g, '')
+      title = title.replace(/第?\s*\d+\s*[-~至到]\s*\d+\s*节?/g, '')
+      title = title.replace(/\d{4}\s*[-/年]\s*\d{1,2}\s*[-/月]\s*\d{1,2}\s*[日号]?/g, '')
+      title = title.replace(/\d{1,2}\s*月\s*\d{1,2}\s*[日号]/g, '')
+      title = title.replace(/[《》]/g, '').trim()
+      location = location.replace(/\s+/g, '').trim()
+
+      if (title && title.length >= 2) {
+        const startIndex = rowIndexAt(grid, cluster[0].y + cluster[0].h / 2)
+        const lastLine = cluster[cluster.length - 1]
+        let endIndex = rowIndexAt(grid, lastLine.y + lastLine.h / 2)
+        if (endIndex < startIndex) endIndex = startIndex
+
+        if (startIndex >= 0) {
+          const times = periodTimes(startIndex, endIndex, false)
+          const periodText = startIndex === endIndex
+            ? '第' + (startIndex + 1) + '节'
+            : '第' + (startIndex + 1) + '-' + (endIndex + 1) + '节'
+
+          drafts.push({
+            id: 'd_' + Date.now().toString(36) + '_' + drafts.length,
+            title: title,
+            location: location,
+            weekdayIndex: column,
+            date: addDaysText(weekStart, column),
+            startPeriodIndex: startIndex,
+            endPeriodIndex: endIndex,
+            changeBreak: false,
+            confirmed: false,
+            gridText: columnNames[column] + ' · ' + periodText,
+            startTime: times.start,
+            endTime: times.end
+          })
+        }
+      }
+
+      cluster = []
+    }
+
+    list.forEach(function (line) {
+      if (cluster.length) {
+        const previous = cluster[cluster.length - 1]
+        if (line.y - previous.y > grid.rowHeight * 0.7) flush()
+      }
+      cluster.push(line)
+    })
+
+    flush()
+  })
+
+  return drafts.slice(0, 20)
+}
+
+function buildDrafts(lines, weekStart, meta) {
+  const scans = (Array.isArray(lines) ? lines : []).map(normalizeScanLine)
+  const grid = detectGrid(scans, meta || {})
+
+  if (grid) {
+    const drafts = buildGridDrafts(scans, weekStart, grid)
+    if (drafts.length > 0) return drafts
+  }
+
+  const drafts = []
+
+  scans.forEach(function (scan) {
+    const text = scan.text
     if (isNoiseLine(text)) return
 
     let title = text
@@ -457,11 +644,12 @@ Page({
       data: { image: base64 },
       timeout: 30000
     }).then(function (data) {
-      const lines = Array.isArray(data.lines)
-        ? data.lines.filter(function (line) { return line && line.trim() }).map(compactText)
-        : []
-
-      const drafts = buildDrafts(lines, that.data.weekStartDate)
+      const lines = Array.isArray(data.lines) ? data.lines : []
+      const drafts = buildDrafts(lines, that.data.weekStartDate, {
+        width: Number(data.width) || 0,
+        height: Number(data.height) || 0,
+        rowLines: Array.isArray(data.rowLines) ? data.rowLines : []
+      })
 
       if (drafts.length === 0) {
         that.setData({ ocrDrafts: [] })

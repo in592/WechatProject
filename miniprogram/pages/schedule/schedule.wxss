@@ -507,6 +507,13 @@
   margin-top: 10rpx;
 }
 
+.draft-grid {
+  margin-top: 10rpx;
+  color: #0B6B57;
+  font-size: 22rpx;
+  line-height: 1.5;
+}
+
 .draft-summary {
   margin-top: 14rpx;
   padding: 14rpx;
