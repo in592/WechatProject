@@ -1,5 +1,7 @@
 const request = require('../../utils/request')
 const auth = require('../../utils/auth')
+const agenda = require('../../utils/agenda')
+const conflict = require('../../utils/conflict')
 
 const CACHE_KEY = 'activities_cache'
 const TYPE_OPTIONS = ['全部', '学术科技', '志愿公益', '文体活动', '技能特长']
@@ -50,6 +52,7 @@ Page({
     filtered: [],
     keyword: '',
     activeType: '全部',
+    avoidConflict: false,
     typeOptions: TYPE_OPTIONS,
     loading: true,
     error: '',
@@ -123,6 +126,8 @@ Page({
     const activities = Array.isArray(source) ? source : this.data.activities
     const text = String(keyword === undefined ? this.data.keyword : keyword || '').trim().toLowerCase()
     const type = activeType === undefined ? this.data.activeType : activeType
+    const avoidConflict = this.data.avoidConflict
+    const schedule = avoidConflict ? agenda.getAgenda() : []
 
     const list = activities.filter(function (item) {
       const itemType = item.type || '其他'
@@ -132,6 +137,13 @@ Page({
       const title = String(item.title || '').toLowerCase()
       const location = String(item.location || '').toLowerCase()
       return title.indexOf(text) >= 0 || location.indexOf(text) >= 0
+    }).filter(function (item) {
+      if (!avoidConflict) return true
+
+      const others = schedule.filter(function (entry) {
+        return String(entry.id) !== String(item.id)
+      })
+      return conflict.findConflicts(item, others).length === 0
     }).map(decorate)
 
     this.setData({ filtered: list })
@@ -147,6 +159,22 @@ Page({
     const activeType = event.currentTarget.dataset.type
     this.setData({ activeType: activeType })
     this.applyFilters(this.data.activities, this.data.keyword, activeType)
+  },
+
+  onToggleConflict: function () {
+    const that = this
+    const next = !this.data.avoidConflict
+
+    this.setData({ avoidConflict: next }, function () {
+      that.applyFilters(that.data.activities, that.data.keyword, that.data.activeType)
+
+      if (next) {
+        wx.showToast({
+          title: that.data.filtered.length > 0 ? '已隐藏冲突活动' : '没有不冲突的活动',
+          icon: 'none'
+        })
+      }
+    })
   },
 
   onCardTap: function (event) {

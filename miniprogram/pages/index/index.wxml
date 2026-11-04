@@ -23,6 +23,7 @@
         data-type="{{item}}"
         bindtap="onTypeTap"
       >{{item}}</view>
+      <view class="type-tab conflict-tab {{avoidConflict ? 'active' : ''}}" bindtap="onToggleConflict">避开冲突</view>
     </scroll-view>
   </view>
 
@@ -40,8 +41,8 @@
   </view>
 
   <view class="state" wx:elif="{{filtered.length === 0}}">
-    <view class="state-title">{{activities.length === 0 ? '还没有活动' : '没有匹配的活动'}}</view>
-    <view class="state-desc">{{activities.length === 0 ? '去网页后台粘贴一条通知，导入后会出现在这里' : '换个关键词或类型试试'}}</view>
+    <view class="state-title">{{activities.length === 0 ? '还没有活动' : (avoidConflict ? '没有不冲突的活动' : '没有匹配的活动')}}</view>
+    <view class="state-desc">{{activities.length === 0 ? '去网页后台粘贴一条通知，导入后会出现在这里' : (avoidConflict ? '取消「避开冲突」或换个类型试试' : '换个关键词或类型试试')}}</view>
   </view>
 
   <view class="list" wx:else>

@@ -61,6 +61,13 @@
   font-weight: 500;
 }
 
+.conflict-tab.active {
+  border-color: #0B6B57;
+  background: #E6FBF5;
+  color: #0B6B57;
+  font-weight: 500;
+}
+
 .cache-banner {
   margin-top: 20rpx;
   padding: 16rpx 20rpx;
