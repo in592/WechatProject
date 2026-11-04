@@ -328,23 +328,28 @@ tbody tr:hover {
 }
 
 .tag.academic {
-  background: #e8f0ff;
-  color: var(--blue);
+  background: #ECEFFF;
+  color: #4F5BA8;
 }
 
 .tag.volunteer {
-  background: #e6f7ee;
-  color: #0b8a4b;
+  background: #E6FBF5;
+  color: #0B6B57;
 }
 
 .tag.sports {
-  background: #fff0e6;
-  color: #c25a00;
+  background: #FFF0E6;
+  color: #8A3F0F;
 }
 
 .tag.skill {
-  background: #f0eaff;
-  color: #6b3fd4;
+  background: #F0EAFF;
+  color: #4A3BB5;
+}
+
+.tag.other {
+  background: #FFF7F5;
+  color: #6D483B;
 }
 
 .source {

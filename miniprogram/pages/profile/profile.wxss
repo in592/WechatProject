@@ -226,8 +226,8 @@
 }
 
 .tag.academic {
-  background: #EEF0FF;
-  color: #4F5BD5;
+  background: #ECEFFF;
+  color: #4F5BA8;
 }
 
 .tag.volunteer {
@@ -237,12 +237,17 @@
 
 .tag.sports {
   background: #FFF0E6;
-  color: #B85516;
+  color: #8A3F0F;
 }
 
 .tag.skill {
   background: #F0EAFF;
-  color: #6B3FD4;
+  color: #4A3BB5;
+}
+
+.tag.other {
+  background: #FFF7F5;
+  color: #6D483B;
 }
 
 

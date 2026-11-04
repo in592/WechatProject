@@ -10,6 +10,26 @@
   background: #FFE4F1;
 }
 
+.hero-academic {
+  background: #ECEFFF;
+}
+
+.hero-volunteer {
+  background: #E6FBF5;
+}
+
+.hero-sports {
+  background: #FFF0E6;
+}
+
+.hero-skill {
+  background: #F0EAFF;
+}
+
+.hero-other {
+  background: #FFF7F5;
+}
+
 .tag {
   display: inline-block;
   padding: 6rpx 18rpx;
@@ -21,8 +41,8 @@
 }
 
 .tag.academic {
-  background: #EEF0FF;
-  color: #4F5BD5;
+  background: #ECEFFF;
+  color: #4F5BA8;
 }
 
 .tag.volunteer {
@@ -32,17 +52,17 @@
 
 .tag.sports {
   background: #FFF0E6;
-  color: #B85516;
+  color: #8A3F0F;
 }
 
 .tag.skill {
   background: #F0EAFF;
-  color: #6B3FD4;
+  color: #4A3BB5;
 }
 
 .tag.other {
-  background: #F0EDEA;
-  color: #5A6069;
+  background: #FFF7F5;
+  color: #6D483B;
 }
 
 .title {

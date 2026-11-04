@@ -12,7 +12,7 @@
   </view>
 
   <block wx:elif="{{activity}}">
-    <view class="hero">
+    <view class="hero hero-{{typeClass}}">
       <text class="tag {{typeClass}}">{{typeText}}</text>
       <view class="title">{{activity.title}}</view>
       <view class="time">{{startText}}<text wx:if="{{endText}}"> - {{endText}}</text></view>

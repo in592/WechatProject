@@ -140,23 +140,28 @@
 }
 
 .card-academic {
-  border-left-color: #4F5BD5;
+  border-left-color: #7B8AD7;
+  background: #FAFBFF;
 }
 
 .card-volunteer {
-  border-left-color: #0B6B57;
+  border-left-color: #5ECD8C;
+  background: #F7FDFA;
 }
 
 .card-sports {
   border-left-color: #B85516;
+  background: #FFF9F4;
 }
 
 .card-skill {
-  border-left-color: #6B3FD4;
+  border-left-color: #615EDE;
+  background: #FAF8FF;
 }
 
 .card-other {
-  border-left-color: #8A9099;
+  border-left-color: #F6CBC6;
+  background: #FFF9F8;
 }
 
 .card-hover {
@@ -209,8 +214,8 @@
 }
 
 .tag.academic {
-  background: #EEF0FF;
-  color: #4F5BD5;
+  background: #ECEFFF;
+  color: #4F5BA8;
 }
 
 .tag.volunteer {
@@ -220,12 +225,17 @@
 
 .tag.sports {
   background: #FFF0E6;
-  color: #B85516;
+  color: #8A3F0F;
 }
 
 .tag.skill {
   background: #F0EAFF;
-  color: #6B3FD4;
+  color: #4A3BB5;
+}
+
+.tag.other {
+  background: #FFF7F5;
+  color: #6D483B;
 }
 
 .credit {

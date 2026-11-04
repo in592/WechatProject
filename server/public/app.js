@@ -106,7 +106,7 @@
     if (type === '志愿公益') return 'volunteer'
     if (type === '文体活动') return 'sports'
     if (type === '技能特长') return 'skill'
-    return ''
+    return 'other'
   }
 
   function renderActivities() {
