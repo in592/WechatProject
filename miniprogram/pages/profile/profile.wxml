@@ -12,33 +12,6 @@
       <text class="stat-value">{{totalCount}}</text>
       <text class="stat-label">已报名活动</text>
     </view>
-    <view class="stat">
-      <text class="stat-value">{{totalCredit}}</text>
-      <text class="stat-label">累计学分</text>
-    </view>
-  </view>
-
-  <view class="card chart-card" wx:if="{{hasCredits}}">
-    <view class="card-title">学分分布</view>
-    <view class="chart-wrap">
-      <canvas type="2d" id="creditChart" class="chart"></canvas>
-      <view class="chart-center">
-        <text class="chart-total">{{totalCredit}}</text>
-        <text class="chart-label">总学分</text>
-      </view>
-    </view>
-    <view class="legend">
-      <view class="legend-item" wx:for="{{typeStats}}" wx:key="name">
-        <text class="dot" style="background: {{item.color}}"></text>
-        <text class="legend-name">{{item.name}}</text>
-        <text class="legend-value">{{item.value}}</text>
-      </view>
-    </view>
-  </view>
-
-  <view class="card empty-chart" wx:else>
-    <view class="empty-title">还没有学分</view>
-    <view class="empty-desc">报名活动后，这里会出现按类型统计的学分饼图</view>
   </view>
 
   <view class="list-head">
@@ -58,7 +31,6 @@
       <view class="signup-meta" wx:if="{{item.location}}">{{item.location}}</view>
       <view class="signup-foot">
         <text class="tag {{item.typeClass}}">{{item.typeText}}</text>
-        <text class="signup-credit">{{item.creditText}}</text>
       </view>
     </view>
   </view>

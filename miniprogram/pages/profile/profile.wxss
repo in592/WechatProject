@@ -245,11 +245,7 @@
   color: #6B3FD4;
 }
 
-.signup-credit {
-  margin-left: 16rpx;
-  color: #8A9099;
-  font-size: 22rpx;
-}
+
 
 .logout {
   width: 100%;
