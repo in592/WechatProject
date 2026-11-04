@@ -15,6 +15,7 @@ const BASE_URL = 'http://127.0.0.1:3000'
 
 function request(options) {
   const opts = options || {}
+  const silent = opts.silent === true
 
   return new Promise(function (resolve, reject) {
     wx.request({
@@ -30,22 +31,22 @@ function request(options) {
         }
 
         const message = (res.data && res.data.error) || ('请求失败（' + res.statusCode + '）')
-        wx.showToast({ title: message, icon: 'none' })
+        if (!silent) wx.showToast({ title: message, icon: 'none' })
         const requestError = new Error(message)
         requestError.statusCode = res.statusCode
         reject(requestError)
       },
       fail: function (err) {
         const message = '网络异常，请检查后端是否启动'
-        wx.showToast({ title: message, icon: 'none' })
+        if (!silent) wx.showToast({ title: message, icon: 'none' })
         reject(new Error(err && err.errMsg ? err.errMsg : message))
       }
     })
   })
 }
 
-function get(url, data) {
-  return request({ url: url, method: 'GET', data: data })
+function get(url, data, options) {
+  return request(Object.assign({ url: url, method: 'GET', data: data }, options || {}))
 }
 
 function post(url, data) {

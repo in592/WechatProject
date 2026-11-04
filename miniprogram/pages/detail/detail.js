@@ -64,7 +64,7 @@ Page({
     const that = this
     this.setData({ loading: true, error: '' })
 
-    return request.get('/api/activities/' + encodeURIComponent(this.data.id))
+    return request.get('/api/activities/' + encodeURIComponent(this.data.id), null, { silent: true })
       .then(function (data) {
         if (!data || data.ok === false || !data.activity) {
           throw new Error('活动不存在')
@@ -107,6 +107,13 @@ Page({
           activity: null,
           error: notFound ? '活动不存在或已删除' : '加载失败，请检查网络或后端是否启动'
         })
+
+        if (notFound) {
+          wx.showToast({ title: '活动已删除', icon: 'none' })
+          setTimeout(function () {
+            that.onBackToList()
+          }, 1200)
+        }
       })
   },
 
