@@ -447,6 +447,8 @@ Page({
   },
 
   onShow: function () {
+    // 清掉可能残留的全局 loading 遮罩，避免看起来所有按钮都点不动
+    wx.hideLoading()
     this.loadList()
   },
 
@@ -674,6 +676,12 @@ Page({
     this.setData({ ocrLoading: true })
     wx.showLoading({ title: '识别中…', mask: true })
 
+    if (this._ocrTimer) clearTimeout(this._ocrTimer)
+    this._ocrTimer = setTimeout(function () {
+      wx.hideLoading()
+      that.setData({ ocrLoading: false, error: '识别超时，请重试' })
+    }, 35000)
+
     request.request({
       url: '/api/ocr',
       method: 'POST',
@@ -702,6 +710,10 @@ Page({
     }).catch(function (err) {
       wx.showToast({ title: (err && err.message) || '识别失败', icon: 'none' })
     }).then(function () {
+      if (that._ocrTimer) {
+        clearTimeout(that._ocrTimer)
+        that._ocrTimer = null
+      }
       wx.hideLoading()
       that.setData({ ocrLoading: false })
     })
