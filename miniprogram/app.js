@@ -11,6 +11,8 @@ App({
   },
 
   onShow: function () {
+    // 防止上次 OCR/请求的 loading 遮罩残留，导致页面看起来“按钮全失效”
+    wx.hideLoading()
     reminder.start()
   },
 

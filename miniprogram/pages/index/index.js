@@ -68,6 +68,7 @@ Page({
   },
 
   onShow: function () {
+    wx.hideLoading()
     if (this.data.loaded) {
       return this.loadActivities()
     }
